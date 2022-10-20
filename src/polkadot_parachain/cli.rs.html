@@ -111,6 +111,11 @@
 <span id="111">111</span>
 <span id="112">112</span>
 <span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
@@ -133,7 +138,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">clap::Subcommand</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Subcommand</span> {
 	<span class="doccomment">/// Key management CLI utilities</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">subcommand</span>)]</span>
+	<span class="attribute">#[<span class="ident">command</span>(<span class="ident">subcommand</span>)]</span>
 	<span class="ident">Key</span>(<span class="ident">sc_cli::KeySubcommand</span>),
 
 	<span class="doccomment">/// Build a chain specification.</span>
@@ -165,24 +170,29 @@
 
 	<span class="doccomment">/// Sub-commands concerned with benchmarking.</span>
 	<span class="doccomment">/// The pallet benchmarking moved to the `pallet` sub-command.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">subcommand</span>)]</span>
+	<span class="attribute">#[<span class="ident">command</span>(<span class="ident">subcommand</span>)]</span>
 	<span class="ident">Benchmark</span>(<span class="ident">frame_benchmarking_cli::BenchmarkCmd</span>),
 
 	<span class="doccomment">/// Try some testing command against a specified runtime state.</span>
+	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
 	<span class="ident">TryRuntime</span>(<span class="ident">try_runtime_cli::TryRuntimeCmd</span>),
+
+	<span class="doccomment">/// Errors since the binary was not build with `--features try-runtime`.</span>
+	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>))]</span>
+	<span class="ident">TryRuntime</span>,
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">clap::Parser</span>)]</span>
-<span class="attribute">#[<span class="ident">clap</span>(
+<span class="attribute">#[<span class="ident">command</span>(
 	<span class="ident">propagate_version</span> <span class="op">=</span> <span class="bool-val">true</span>,
 	<span class="ident">args_conflicts_with_subcommands</span> <span class="op">=</span> <span class="bool-val">true</span>,
 	<span class="ident">subcommand_negates_reqs</span> <span class="op">=</span> <span class="bool-val">true</span>
 )]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Cli</span> {
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">subcommand</span>)]</span>
+	<span class="attribute">#[<span class="ident">command</span>(<span class="ident">subcommand</span>)]</span>
 	<span class="kw">pub</span> <span class="ident">subcommand</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Subcommand</span><span class="op">&gt;</span>,
 
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">flatten</span>)]</span>
+	<span class="attribute">#[<span class="ident">command</span>(<span class="ident">flatten</span>)]</span>
 	<span class="kw">pub</span> <span class="ident">run</span>: <span class="ident">cumulus_client_cli::RunCmd</span>,
 
 	<span class="doccomment">/// Disable automatic hardware benchmarks.</span>
@@ -192,11 +202,11 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The results are then printed out in the logs, and also sent as part of</span>
 	<span class="doccomment">/// telemetry, if telemetry is enabled.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">long</span>)]</span>
+	<span class="attribute">#[<span class="ident">arg</span>(<span class="ident">long</span>)]</span>
 	<span class="kw">pub</span> <span class="ident">no_hardware_benchmarks</span>: <span class="ident">bool</span>,
 
 	<span class="doccomment">/// Relay chain arguments</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">raw</span> <span class="op">=</span> <span class="bool-val">true</span>)]</span>
+	<span class="attribute">#[<span class="ident">arg</span>(<span class="ident">raw</span> <span class="op">=</span> <span class="bool-val">true</span>)]</span>
 	<span class="kw">pub</span> <span class="ident">relaychain_args</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
