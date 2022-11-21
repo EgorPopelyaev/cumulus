@@ -968,6 +968,11 @@
 <span id="968">968</span>
 <span id="969">969</span>
 <span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021-2022 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -1055,10 +1060,10 @@
 	<span class="ident">spec_name</span>: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;westmint&quot;</span>),
 	<span class="ident">impl_name</span>: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;westmint&quot;</span>),
 	<span class="ident">authoring_version</span>: <span class="number">1</span>,
-	<span class="ident">spec_version</span>: <span class="number">9300</span>,
+	<span class="ident">spec_version</span>: <span class="number">9320</span>,
 	<span class="ident">impl_version</span>: <span class="number">0</span>,
 	<span class="ident">apis</span>: <span class="ident">RUNTIME_API_VERSIONS</span>,
-	<span class="ident">transaction_version</span>: <span class="number">8</span>,
+	<span class="ident">transaction_version</span>: <span class="number">9</span>,
 	<span class="ident">state_version</span>: <span class="number">0</span>,
 };
 
@@ -1128,7 +1133,7 @@
 <span class="kw">impl</span> <span class="ident">pallet_timestamp::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
 	<span class="doccomment">/// A timestamp: milliseconds since the unix epoch.</span>
 	<span class="kw">type</span> <span class="ident">Moment</span> <span class="op">=</span> <span class="ident">u64</span>;
-	<span class="kw">type</span> <span class="ident">OnTimestampSet</span> <span class="op">=</span> ();
+	<span class="kw">type</span> <span class="ident">OnTimestampSet</span> <span class="op">=</span> <span class="ident">Aura</span>;
 	<span class="kw">type</span> <span class="ident">MinimumPeriod</span> <span class="op">=</span> <span class="ident">MinimumPeriod</span>;
 	<span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">weights::pallet_timestamp::WeightInfo</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
@@ -1198,6 +1203,7 @@
 	<span class="kw">type</span> <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">Balance</span>;
 	<span class="kw">type</span> <span class="ident">AssetId</span> <span class="op">=</span> <span class="ident">AssetId</span>;
 	<span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">Balances</span>;
+	<span class="kw">type</span> <span class="ident">CreateOrigin</span> <span class="op">=</span> <span class="ident">AsEnsureOriginWithArg</span><span class="op">&lt;</span><span class="ident">EnsureSigned</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">ForceOrigin</span> <span class="op">=</span> <span class="ident">AssetsForceOrigin</span>;
 	<span class="kw">type</span> <span class="ident">AssetDeposit</span> <span class="op">=</span> <span class="ident">AssetDeposit</span>;
 	<span class="kw">type</span> <span class="ident">MetadataDepositBase</span> <span class="op">=</span> <span class="ident">MetadataDepositBase</span>;
@@ -1208,6 +1214,7 @@
 	<span class="kw">type</span> <span class="ident">Extra</span> <span class="op">=</span> ();
 	<span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">weights::pallet_assets::WeightInfo</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">AssetAccountDeposit</span> <span class="op">=</span> <span class="ident">AssetAccountDeposit</span>;
+	<span class="kw">type</span> <span class="ident">RemoveItemsLimit</span> <span class="op">=</span> <span class="ident">frame_support::traits::ConstU32</span><span class="op">&lt;</span><span class="number">1000</span><span class="op">&gt;</span>;
 }
 
 <span class="macro">parameter_types!</span> {
@@ -1215,7 +1222,7 @@
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DepositBase</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">deposit</span>(<span class="number">1</span>, <span class="number">88</span>);
 	<span class="comment">// Additional storage item size of 32 bytes.</span>
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DepositFactor</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">deposit</span>(<span class="number">0</span>, <span class="number">32</span>);
-	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MaxSignatories</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">100</span>;
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MaxSignatories</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">100</span>;
 }
 
 <span class="kw">impl</span> <span class="ident">pallet_multisig::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
@@ -1310,7 +1317,10 @@
 			<span class="ident">ProxyType::AssetOwner</span> =&gt; <span class="macro">matches!</span>(
 				<span class="ident">c</span>,
 				<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::create</span> { .. }) <span class="op">|</span>
-					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::destroy</span> { .. }) <span class="op">|</span>
+					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::start_destroy</span> { .. }) <span class="op">|</span>
+					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::destroy_accounts</span> { .. }) <span class="op">|</span>
+					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::destroy_approvals</span> { .. }) <span class="op">|</span>
+					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::finish_destroy</span> { .. }) <span class="op">|</span>
 					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::transfer_ownership</span> { .. }) <span class="op">|</span>
 					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::set_team</span> { .. }) <span class="op">|</span>
 					<span class="ident">RuntimeCall::Assets</span>(<span class="ident">pallet_assets::Call::set_metadata</span> { .. }) <span class="op">|</span>
@@ -1590,7 +1600,7 @@
 	<span class="ident">frame_system::ChainContext</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>,
 	<span class="ident">Runtime</span>,
 	<span class="ident">AllPalletsWithSystem</span>,
-	(),
+	<span class="ident">pallet_assets::migration::v1::MigrateToV1</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>,
 <span class="op">&gt;</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
