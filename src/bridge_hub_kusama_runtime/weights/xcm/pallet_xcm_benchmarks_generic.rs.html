@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parachains/runtimes/bridge-hubs/bridge-hub-kusama/src/weights/xcm/pallet_xcm_benchmarks_generic.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pallet_xcm_benchmarks_generic.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../bridge_hub_kusama_runtime/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../../../bridge_hub_kusama_runtime/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../bridge_hub_kusama_runtime/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `parachains/runtimes/bridge-hubs/bridge-hub-kusama/src/weights/xcm/pallet_xcm_benchmarks_generic.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pallet_xcm_benchmarks_generic.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../bridge_hub_kusama_runtime/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -135,7 +135,6 @@
 <span id="135">135</span>
 <span id="136">136</span>
 <span id="137">137</span>
-<span id="138">138</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -156,26 +155,25 @@
 </span><span class="doccomment">//! Autogenerated weights for `pallet_xcm_benchmarks::generic`
 //!
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 4.0.0-dev
-//! DATE: 2022-12-15, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
-//! HOSTNAME: `bm3`, CPU: `Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz`
+//! DATE: 2022-12-21, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
+//! HOSTNAME: `bm5`, CPU: `Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz`
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some(&quot;bridge-hub-kusama-dev&quot;), DB CACHE: 1024
 
 </span><span class="comment">// Executed Command:
-// /home/benchbot/cargo_target_dir/production/polkadot-parachain
+// ./artifacts/polkadot-parachain
 // benchmark
 // pallet
-// --steps=50
-// --repeat=20
-// --extrinsic=*
+// --template=./templates/xcm-bench-template.hbs
+// --chain=bridge-hub-kusama-dev
 // --execution=wasm
 // --wasm-execution=compiled
-// --heap-pages=4096
-// --json-file=/var/lib/gitlab-runner/builds/zyw4fam_/0/parity/mirrors/cumulus/.git/.artifacts/bench.json
 // --pallet=pallet_xcm_benchmarks::generic
-// --chain=bridge-hub-kusama-dev
+// --extrinsic=*
+// --steps=50
+// --repeat=20
+// --json
 // --header=./file_header.txt
-// --template=./templates/xcm-bench-template.hbs
-// --output=./parachains/runtimes/bridge-hubs/bridge-hub-kusama/src/weights/xcm/
+// --output=./parachains/runtimes/bridge-hubs/bridge-hub-kusama/src/weights/xcm/pallet_xcm_benchmarks_generic.rs
 
 </span><span class="attribute">#![cfg_attr(rustfmt, rustfmt_skip)]
 #![allow(unused_parens)]
@@ -194,38 +192,38 @@
 	// Storage: ParachainSystem HostConfiguration (r:1 w:0)
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>query_holding() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">21_039_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">21_401_000 </span><span class="kw">as </span>u64)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">6 </span><span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2 </span><span class="kw">as </span>u64))
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>buy_execution() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">5_375_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">5_320_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="comment">// Storage: PolkadotXcm Queries (r:1 w:0)
 	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>query_response() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">16_091_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">16_749_000 </span><span class="kw">as </span>u64)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1 </span><span class="kw">as </span>u64))
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transact() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">19_057_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">19_670_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>refund_surplus() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">5_397_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">5_373_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_error_handler() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">5_347_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">5_100_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_appendix() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">5_346_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">5_288_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clear_error() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">5_310_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">5_315_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>descend_origin() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">6_273_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">6_432_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clear_origin() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">5_279_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">5_254_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="comment">// Storage: PolkadotXcm SupportedVersion (r:1 w:0)
 	// Storage: PolkadotXcm VersionDiscoveryQueue (r:1 w:1)
@@ -233,18 +231,18 @@
 	// Storage: ParachainSystem HostConfiguration (r:1 w:0)
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>report_error() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">14_974_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">15_047_000 </span><span class="kw">as </span>u64)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">5 </span><span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2 </span><span class="kw">as </span>u64))
 	}
 	<span class="comment">// Storage: PolkadotXcm AssetTraps (r:1 w:1)
 	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>claim_asset() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">20_711_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">21_288_000 </span><span class="kw">as </span>u64)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1 </span><span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1 </span><span class="kw">as </span>u64))
 	}
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>trap() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">5_154_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">5_120_000 </span><span class="kw">as </span>u64)
 	}
 	<span class="comment">// Storage: PolkadotXcm VersionNotifyTargets (r:1 w:1)
 	// Storage: PolkadotXcm SupportedVersion (r:1 w:0)
@@ -253,13 +251,13 @@
 	// Storage: ParachainSystem HostConfiguration (r:1 w:0)
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>subscribe_version() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">17_872_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">17_992_000 </span><span class="kw">as </span>u64)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">6 </span><span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">3 </span><span class="kw">as </span>u64))
 	}
 	<span class="comment">// Storage: PolkadotXcm VersionNotifyTargets (r:0 w:1)
 	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>unsubscribe_version() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">7_356_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">7_321_000 </span><span class="kw">as </span>u64)
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1 </span><span class="kw">as </span>u64))
 	}
 	<span class="comment">// Storage: ParachainInfo ParachainId (r:1 w:0)
@@ -269,10 +267,10 @@
 	// Storage: ParachainSystem HostConfiguration (r:1 w:0)
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>initiate_reserve_withdraw() -&gt; Weight {
-		Weight::from_ref_time(<span class="number">22_312_000 </span><span class="kw">as </span>u64)
+		Weight::from_ref_time(<span class="number">22_846_000 </span><span class="kw">as </span>u64)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">6 </span><span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2 </span><span class="kw">as </span>u64))
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="bridge_hub_kusama_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="bridge_hub_kusama_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
