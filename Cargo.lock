@@ -138,6 +138,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ahash"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf6ccdb167abbf410dcb915cabd428929d7f6a04980b54a11f26a39f1c7f7107"
+dependencies = [
+ "cfg-if",
+ "once_cell",
+ "version_check",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "0.7.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2177,7 +2188,7 @@ dependencies = [
  "cumulus-relay-chain-interface",
  "cumulus-relay-chain-rpc-interface",
  "futures",
- "lru",
+ "lru 0.9.0",
  "polkadot-core-primitives",
  "polkadot-network-bridge",
  "polkadot-node-network-protocol",
@@ -2216,7 +2227,7 @@ dependencies = [
  "futures",
  "futures-timer",
  "jsonrpsee",
- "lru",
+ "lru 0.9.0",
  "parity-scale-codec",
  "polkadot-service",
  "sc-client-api",
@@ -2798,7 +2809,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c24f403d068ad0b359e577a77f92392118be3f3c927538f2bb544a5ecd828c6"
 dependencies = [
  "curve25519-dalek 3.2.0",
- "hashbrown",
+ "hashbrown 0.12.3",
  "hex",
  "rand_core 0.6.3",
  "sha2 0.9.8",
@@ -3743,7 +3754,16 @@ version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
+]
+
+[[package]]
+name = "hashbrown"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
+dependencies = [
+ "ahash 0.8.2",
 ]
 
 [[package]]
@@ -4038,7 +4058,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10a35a97730320ffe8e2d410b5d3b69279b98d2c14bdb8b70ea89ecf7888d41e"
 dependencies = [
  "autocfg",
- "hashbrown",
+ "hashbrown 0.12.3",
  "serde",
 ]
 
@@ -4596,7 +4616,7 @@ dependencies = [
  "libp2p-core",
  "libp2p-swarm",
  "log",
- "lru",
+ "lru 0.8.1",
  "prost",
  "prost-build",
  "prost-codec",
@@ -5052,7 +5072,16 @@ version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6e8aaa3f231bb4bd57b84b2d5dc3ae7f350265df8aa96492e0bc394a1571909"
 dependencies = [
- "hashbrown",
+ "hashbrown 0.12.3",
+]
+
+[[package]]
+name = "lru"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71e7d46de488603ffdd5f30afbc64fbba2378214a2c3a2fb83abf3d33126df17"
+dependencies = [
+ "hashbrown 0.13.2",
 ]
 
 [[package]]
@@ -5178,7 +5207,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e0c7cba9ce19ac7ffd2053ac9f49843bbd3f4318feedfd74e85c19d5fb0ba66"
 dependencies = [
  "hash-db",
- "hashbrown",
+ "hashbrown 0.12.3",
 ]
 
 [[package]]
@@ -5627,7 +5656,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21158b2c33aa6d4561f1c0a6ea283ca92bc54802a93b263e910746d679a7eb53"
 dependencies = [
  "crc32fast",
- "hashbrown",
+ "hashbrown 0.12.3",
  "indexmap",
  "memchr",
 ]
@@ -7448,7 +7477,7 @@ dependencies = [
  "derive_more",
  "fatality",
  "futures",
- "lru",
+ "lru 0.8.1",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -7470,7 +7499,7 @@ source = "git+https://github.com/paritytech/polkadot?branch=master#2ac18997ab328
 dependencies = [
  "fatality",
  "futures",
- "lru",
+ "lru 0.8.1",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -7598,7 +7627,7 @@ dependencies = [
  "futures",
  "futures-timer",
  "indexmap",
- "lru",
+ "lru 0.8.1",
  "parity-scale-codec",
  "polkadot-erasure-coding",
  "polkadot-node-network-protocol",
@@ -7699,7 +7728,7 @@ dependencies = [
  "futures",
  "futures-timer",
  "kvdb",
- "lru",
+ "lru 0.8.1",
  "merlin",
  "parity-scale-codec",
  "polkadot-node-jaeger",
@@ -7831,7 +7860,7 @@ dependencies = [
  "fatality",
  "futures",
  "kvdb",
- "lru",
+ "lru 0.8.1",
  "parity-scale-codec",
  "polkadot-node-primitives",
  "polkadot-node-subsystem",
@@ -7931,7 +7960,7 @@ version = "0.9.33"
 source = "git+https://github.com/paritytech/polkadot?branch=master#2ac18997ab3289cc8f0261f56cd43021fb405ebd"
 dependencies = [
  "futures",
- "lru",
+ "lru 0.8.1",
  "polkadot-node-metrics",
  "polkadot-node-subsystem",
  "polkadot-node-subsystem-types",
@@ -8085,7 +8114,7 @@ dependencies = [
  "futures-channel",
  "itertools",
  "kvdb",
- "lru",
+ "lru 0.8.1",
  "parity-db",
  "parity-scale-codec",
  "parking_lot 0.11.2",
@@ -8114,7 +8143,7 @@ dependencies = [
  "async-trait",
  "futures",
  "futures-timer",
- "lru",
+ "lru 0.8.1",
  "orchestra",
  "parking_lot 0.12.1",
  "polkadot-node-metrics",
@@ -8519,7 +8548,7 @@ dependencies = [
  "kusama-runtime",
  "kvdb",
  "kvdb-rocksdb",
- "lru",
+ "lru 0.8.1",
  "mmr-gadget",
  "pallet-babe",
  "pallet-im-online",
@@ -10114,7 +10143,7 @@ name = "sc-executor"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#7ff6fa2bfa47f288216fdc6e1585f69756c5ec75"
 dependencies = [
- "lru",
+ "lru 0.8.1",
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "sc-executor-common",
@@ -10181,7 +10210,7 @@ name = "sc-finality-grandpa"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#7ff6fa2bfa47f288216fdc6e1585f69756c5ec75"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
  "array-bytes 4.2.0",
  "async-trait",
  "dyn-clone",
@@ -10283,7 +10312,7 @@ dependencies = [
  "ip_network",
  "libp2p",
  "log",
- "lru",
+ "lru 0.8.1",
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "pin-project",
@@ -10358,12 +10387,12 @@ name = "sc-network-gossip"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#7ff6fa2bfa47f288216fdc6e1585f69756c5ec75"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
  "futures",
  "futures-timer",
  "libp2p",
  "log",
- "lru",
+ "lru 0.8.1",
  "sc-network-common",
  "sc-peerset",
  "sp-runtime",
@@ -10403,7 +10432,7 @@ dependencies = [
  "futures",
  "libp2p",
  "log",
- "lru",
+ "lru 0.8.1",
  "mockall",
  "parity-scale-codec",
  "prost",
@@ -11424,7 +11453,7 @@ source = "git+https://github.com/paritytech/substrate?branch=master#7ff6fa2bfa47
 dependencies = [
  "futures",
  "log",
- "lru",
+ "lru 0.8.1",
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "sp-api",
@@ -11954,11 +11983,11 @@ name = "sp-trie"
 version = "7.0.0"
 source = "git+https://github.com/paritytech/substrate?branch=master#7ff6fa2bfa47f288216fdc6e1585f69756c5ec75"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
  "hash-db",
- "hashbrown",
+ "hashbrown 0.12.3",
  "lazy_static",
- "lru",
+ "lru 0.8.1",
  "memory-db",
  "nohash-hasher",
  "parity-scale-codec",
@@ -13000,7 +13029,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "004e1e8f92535694b4cb1444dc5a8073ecf0815e3357f729638b9f8fc4062908"
 dependencies = [
  "hash-db",
- "hashbrown",
+ "hashbrown 0.12.3",
  "log",
  "rustc-hex",
  "smallvec",
@@ -13254,9 +13283,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version_check"
-version = "0.9.3"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
+checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "void"
