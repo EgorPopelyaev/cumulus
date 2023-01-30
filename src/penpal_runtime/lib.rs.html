@@ -795,6 +795,16 @@
 <span id="795">795</span>
 <span id="796">796</span>
 <span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -990,7 +1000,7 @@
 	spec_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;penpal-parachain&quot;</span>),
 	impl_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;penpal-parachain&quot;</span>),
 	authoring_version: <span class="number">1</span>,
-	spec_version: <span class="number">9360</span>,
+	spec_version: <span class="number">9370</span>,
 	impl_version: <span class="number">0</span>,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: <span class="number">1</span>,
@@ -1134,8 +1144,6 @@
 
 <span class="kw">impl </span>pallet_authorship::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>FindAuthor = pallet_session::FindAccountFromAuthorIndex&lt;<span class="self">Self</span>, Aura&gt;;
-	<span class="kw">type </span>UncleGenerations = ConstU32&lt;<span class="number">0</span>&gt;;
-	<span class="kw">type </span>FilterUncle = ();
 	<span class="kw">type </span>EventHandler = (CollatorSelection,);
 }
 
@@ -1334,7 +1342,7 @@
 		AssetTxPayment: pallet_asset_tx_payment::{Pallet, Event&lt;T&gt;} = <span class="number">12</span>,
 
 		<span class="comment">// Collator support. The order of these 4 are important and shall not change.
-		</span>Authorship: pallet_authorship::{Pallet, Call, Storage} = <span class="number">20</span>,
+		</span>Authorship: pallet_authorship::{Pallet, Storage} = <span class="number">20</span>,
 		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event&lt;T&gt;, Config&lt;T&gt;} = <span class="number">21</span>,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config&lt;T&gt;} = <span class="number">22</span>,
 		Aura: pallet_aura::{Pallet, Storage, Config&lt;T&gt;} = <span class="number">23</span>,
@@ -1468,6 +1476,12 @@
 		) -&gt; pallet_transaction_payment::FeeDetails&lt;Balance&gt; {
 			TransactionPayment::query_fee_details(uxt, len)
 		}
+		<span class="kw">fn </span>query_weight_to_fee(weight: Weight) -&gt; Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		<span class="kw">fn </span>query_length_to_fee(length: u32) -&gt; Balance {
+			TransactionPayment::length_to_fee(length)
+		}
 	}
 
 	<span class="kw">impl </span>pallet_transaction_payment_rpc_runtime_api::TransactionPaymentCallApi&lt;Block, Balance, RuntimeCall&gt;
@@ -1484,6 +1498,12 @@
 			len: u32,
 		) -&gt; pallet_transaction_payment::FeeDetails&lt;Balance&gt; {
 			TransactionPayment::query_call_fee_details(call, len)
+		}
+		<span class="kw">fn </span>query_weight_to_fee(weight: Weight) -&gt; Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		<span class="kw">fn </span>query_length_to_fee(length: u32) -&gt; Balance {
+			TransactionPayment::length_to_fee(length)
 		}
 	}
 
@@ -1593,4 +1613,4 @@
 	CheckInherents = CheckInherents,
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="penpal_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="penpal_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

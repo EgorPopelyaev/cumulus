@@ -779,6 +779,18 @@
 <span id="779">779</span>
 <span id="780">780</span>
 <span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -847,7 +859,7 @@
 
 <span class="kw">use </span>parachains_common::{
 	impls::{AssetsFrom, NonZeroIssuance},
-	AccountId, AssetId, Signature,
+	AccountId, AssetIdForTrustBackedAssets, Signature,
 };
 <span class="kw">use </span>xcm_builder::{
 	AllowKnownQueryResponses, AllowSubscriptionsFrom, AsPrefixedGeneralIndex, ConvertedConcreteId,
@@ -882,7 +894,7 @@
 	spec_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;test-parachain&quot;</span>),
 	impl_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;test-parachain&quot;</span>),
 	authoring_version: <span class="number">1</span>,
-	spec_version: <span class="number">9360</span>,
+	spec_version: <span class="number">9370</span>,
 	impl_version: <span class="number">0</span>,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: <span class="number">4</span>,
@@ -1095,9 +1107,9 @@
 	</span>Assets,
 	<span class="comment">// Use this currency when it is a fungible asset matching the given location or name:
 	</span>ConvertedConcreteId&lt;
-		AssetId,
+		AssetIdForTrustBackedAssets,
 		u64,
-		AsPrefixedGeneralIndex&lt;StatemintAssetsPalletLocation, AssetId, JustTry&gt;,
+		AsPrefixedGeneralIndex&lt;StatemintAssetsPalletLocation, AssetIdForTrustBackedAssets, JustTry&gt;,
 		JustTry,
 	&gt;,
 	<span class="comment">// Convert an XCM MultiLocation into a local account id:
@@ -1295,8 +1307,8 @@
 <span class="kw">impl </span>pallet_assets::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
 	<span class="kw">type </span>Balance = u64;
-	<span class="kw">type </span>AssetId = AssetId;
-	<span class="kw">type </span>AssetIdParameter = codec::Compact&lt;AssetId&gt;;
+	<span class="kw">type </span>AssetId = AssetIdForTrustBackedAssets;
+	<span class="kw">type </span>AssetIdParameter = codec::Compact&lt;AssetIdForTrustBackedAssets&gt;;
 	<span class="kw">type </span>Currency = Balances;
 	<span class="kw">type </span>CreateOrigin = AsEnsureOriginWithArg&lt;EnsureSigned&lt;AccountId&gt;&gt;;
 	<span class="kw">type </span>ForceOrigin = AdminOrigin;
@@ -1506,6 +1518,12 @@
 		) -&gt; pallet_transaction_payment::FeeDetails&lt;Balance&gt; {
 			TransactionPayment::query_fee_details(uxt, len)
 		}
+		<span class="kw">fn </span>query_weight_to_fee(weight: Weight) -&gt; Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		<span class="kw">fn </span>query_length_to_fee(length: u32) -&gt; Balance {
+			TransactionPayment::length_to_fee(length)
+		}
 	}
 
 	<span class="kw">impl </span>pallet_transaction_payment_rpc_runtime_api::TransactionPaymentCallApi&lt;Block, Balance, RuntimeCall&gt;
@@ -1522,6 +1540,12 @@
 			len: u32,
 		) -&gt; pallet_transaction_payment::FeeDetails&lt;Balance&gt; {
 			TransactionPayment::query_call_fee_details(call, len)
+		}
+		<span class="kw">fn </span>query_weight_to_fee(weight: Weight) -&gt; Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		<span class="kw">fn </span>query_length_to_fee(length: u32) -&gt; Balance {
+			TransactionPayment::length_to_fee(length)
 		}
 	}
 
@@ -1561,4 +1585,4 @@
 	CheckInherents = CheckInherents,
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rococo_parachain_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rococo_parachain_runtime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>
