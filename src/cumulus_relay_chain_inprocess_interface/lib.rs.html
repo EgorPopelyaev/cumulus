@@ -537,9 +537,8 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>cumulus_primitives_core::{
 	relay_chain::{
-		runtime_api::ParachainHost, Block <span class="kw">as </span>PBlock, BlockId, CommittedCandidateReceipt,
-		Hash <span class="kw">as </span>PHash, Header <span class="kw">as </span>PHeader, InboundHrmpMessage, OccupiedCoreAssumption, SessionIndex,
-		ValidatorId,
+		runtime_api::ParachainHost, Block <span class="kw">as </span>PBlock, CommittedCandidateReceipt, Hash <span class="kw">as </span>PHash,
+		Header <span class="kw">as </span>PHeader, InboundHrmpMessage, OccupiedCoreAssumption, SessionIndex, ValidatorId,
 	},
 	InboundDownwardMessage, ParaId, PersistedValidationData,
 };
@@ -611,7 +610,7 @@
 		relay_parent: PHash,
 	) -&gt; RelayChainResult&lt;Vec&lt;InboundDownwardMessage&gt;&gt; {
 		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().dmq_contents_with_context(
-			<span class="kw-2">&amp;</span>BlockId::hash(relay_parent),
+			relay_parent,
 			sp_core::ExecutionContext::Importing,
 			para_id,
 		)<span class="question-mark">?</span>)
@@ -623,7 +622,7 @@
 		relay_parent: PHash,
 	) -&gt; RelayChainResult&lt;BTreeMap&lt;ParaId, Vec&lt;InboundHrmpMessage&gt;&gt;&gt; {
 		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().inbound_hrmp_channels_contents_with_context(
-			<span class="kw-2">&amp;</span>BlockId::hash(relay_parent),
+			relay_parent,
 			sp_core::ExecutionContext::Importing,
 			para_id,
 		)<span class="question-mark">?</span>)
@@ -636,7 +635,7 @@
 		occupied_core_assumption: OccupiedCoreAssumption,
 	) -&gt; RelayChainResult&lt;<span class="prelude-ty">Option</span>&lt;PersistedValidationData&gt;&gt; {
 		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().persisted_validation_data(
-			<span class="kw-2">&amp;</span>BlockId::Hash(hash),
+			hash,
 			para_id,
 			occupied_core_assumption,
 		)<span class="question-mark">?</span>)
@@ -647,18 +646,15 @@
 		hash: PHash,
 		para_id: ParaId,
 	) -&gt; RelayChainResult&lt;<span class="prelude-ty">Option</span>&lt;CommittedCandidateReceipt&gt;&gt; {
-		<span class="prelude-val">Ok</span>(<span class="self">self
-			</span>.full_client
-			.runtime_api()
-			.candidate_pending_availability(<span class="kw-2">&amp;</span>BlockId::Hash(hash), para_id)<span class="question-mark">?</span>)
+		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().candidate_pending_availability(hash, para_id)<span class="question-mark">?</span>)
 	}
 
 	<span class="kw">async fn </span>session_index_for_child(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: PHash) -&gt; RelayChainResult&lt;SessionIndex&gt; {
-		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().session_index_for_child(<span class="kw-2">&amp;</span>BlockId::Hash(hash))<span class="question-mark">?</span>)
+		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().session_index_for_child(hash)<span class="question-mark">?</span>)
 	}
 
 	<span class="kw">async fn </span>validators(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: PHash) -&gt; RelayChainResult&lt;Vec&lt;ValidatorId&gt;&gt; {
-		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().validators(<span class="kw-2">&amp;</span>BlockId::Hash(hash))<span class="question-mark">?</span>)
+		<span class="prelude-val">Ok</span>(<span class="self">self</span>.full_client.runtime_api().validators(hash)<span class="question-mark">?</span>)
 	}
 
 	<span class="kw">async fn </span>import_notification_stream(
@@ -683,6 +679,10 @@
 
 	<span class="kw">async fn </span>best_block_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RelayChainResult&lt;PHash&gt; {
 		<span class="prelude-val">Ok</span>(<span class="self">self</span>.backend.blockchain().info().best_hash)
+	}
+
+	<span class="kw">async fn </span>finalized_block_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RelayChainResult&lt;PHash&gt; {
+		<span class="prelude-val">Ok</span>(<span class="self">self</span>.backend.blockchain().info().finalized_hash)
 	}
 
 	<span class="kw">async fn </span>is_major_syncing(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RelayChainResult&lt;bool&gt; {
@@ -885,13 +885,13 @@
 		parachain_config,
 		telemetry_worker_handle,
 		hwbench,
-	)<span class="question-mark">?</span>;
+	)
+	.map_err(|e| RelayChainError::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
 
-	<span class="kw">let </span>sync_oracle: Arc&lt;<span class="kw">dyn </span>SyncOracle + Send + Sync&gt; = Arc::new(full_node.network.clone());
 	<span class="kw">let </span>relay_chain_interface_builder = RelayChainInProcessInterfaceBuilder {
 		polkadot_client: full_node.client.clone(),
 		backend: full_node.backend.clone(),
-		sync_oracle,
+		sync_oracle: full_node.sync_service.clone(),
 		overseer_handle: full_node.overseer_handle.clone().ok_or(RelayChainError::GenericError(
 			<span class="string">&quot;Overseer not running in full node.&quot;</span>.to_string(),
 		))<span class="question-mark">?</span>,
@@ -1035,4 +1035,4 @@
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_relay_chain_inprocess_interface" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_relay_chain_inprocess_interface" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

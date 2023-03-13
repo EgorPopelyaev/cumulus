@@ -838,7 +838,7 @@
 <span class="kw">impl </span>OnRuntimeUpgrade <span class="kw">for </span>TestOnRuntimeUpgrade {
 	<span class="kw">fn </span>on_runtime_upgrade() -&gt; frame_support::weights::Weight {
 		<span class="macro">assert_eq!</span>(sp_io::storage::get(TEST_RUNTIME_UPGRADE_KEY), <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>].into()));
-		Weight::from_ref_time(<span class="number">1</span>)
+		Weight::from_parts(<span class="number">1</span>, <span class="number">0</span>)
 	}
 }
 
@@ -971,4 +971,4 @@
 	CheckInherents = CheckInherents,
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_test_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_test_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

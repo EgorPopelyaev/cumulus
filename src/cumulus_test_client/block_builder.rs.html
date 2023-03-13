@@ -168,13 +168,6 @@
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
 <a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -199,10 +192,7 @@
 <span class="kw">use </span>polkadot_primitives::{BlockNumber <span class="kw">as </span>PBlockNumber, Hash <span class="kw">as </span>PHash};
 <span class="kw">use </span>sc_block_builder::{BlockBuilder, BlockBuilderProvider};
 <span class="kw">use </span>sp_api::ProvideRuntimeApi;
-<span class="kw">use </span>sp_runtime::{
-	generic::BlockId,
-	traits::{Block <span class="kw">as </span>BlockT, Header <span class="kw">as </span>HeaderT},
-};
+<span class="kw">use </span>sp_runtime::traits::{Block <span class="kw">as </span>BlockT, Header <span class="kw">as </span>HeaderT};
 
 <span class="doccomment">/// An extension for the Cumulus test client to init a block builder.
 </span><span class="kw">pub trait </span>InitBlockBuilder {
@@ -222,10 +212,10 @@
 	<span class="doccomment">/// Init a specific block builder at a specific block that works for the test runtime.
 	///
 	/// Same as [`InitBlockBuilder::init_block_builder`] besides that it takes a
-	/// [`BlockId`] to say which should be the parent block of the block that is being build.
+	/// [`type@Hash`] to say which should be the parent block of the block that is being build.
 	</span><span class="kw">fn </span>init_block_builder_at(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		at: <span class="kw-2">&amp;</span>BlockId&lt;Block&gt;,
+		at: Hash,
 		validation_data: <span class="prelude-ty">Option</span>&lt;PersistedValidationData&lt;PHash, PBlockNumber&gt;&gt;,
 		relay_sproof_builder: RelayStateSproofBuilder,
 	) -&gt; sc_block_builder::BlockBuilder&lt;Block, Client, Backend&gt;;
@@ -233,11 +223,11 @@
 	<span class="doccomment">/// Init a specific block builder that works for the test runtime.
 	///
 	/// Same as [`InitBlockBuilder::init_block_builder`] besides that it takes a
-	/// [`BlockId`] to say which should be the parent block of the block that is being build and
+	/// [`type@Hash`] to say which should be the parent block of the block that is being build and
 	/// it will use the given `timestamp` as input for the timestamp inherent.
 	</span><span class="kw">fn </span>init_block_builder_with_timestamp(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		at: <span class="kw-2">&amp;</span>BlockId&lt;Block&gt;,
+		at: Hash,
 		validation_data: <span class="prelude-ty">Option</span>&lt;PersistedValidationData&lt;PHash, PBlockNumber&gt;&gt;,
 		relay_sproof_builder: RelayStateSproofBuilder,
 		timestamp: u64,
@@ -246,7 +236,7 @@
 
 <span class="kw">fn </span>init_block_builder&lt;<span class="lifetime">&#39;a</span>&gt;(
 	client: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Client,
-	at: <span class="kw-2">&amp;</span>BlockId&lt;Block&gt;,
+	at: Hash,
 	validation_data: <span class="prelude-ty">Option</span>&lt;PersistedValidationData&lt;PHash, PBlockNumber&gt;&gt;,
 	relay_sproof_builder: RelayStateSproofBuilder,
 	timestamp: u64,
@@ -300,16 +290,12 @@
 		relay_sproof_builder: RelayStateSproofBuilder,
 	) -&gt; BlockBuilder&lt;Block, Client, Backend&gt; {
 		<span class="kw">let </span>chain_info = <span class="self">self</span>.chain_info();
-		<span class="self">self</span>.init_block_builder_at(
-			<span class="kw-2">&amp;</span>BlockId::Hash(chain_info.best_hash),
-			validation_data,
-			relay_sproof_builder,
-		)
+		<span class="self">self</span>.init_block_builder_at(chain_info.best_hash, validation_data, relay_sproof_builder)
 	}
 
 	<span class="kw">fn </span>init_block_builder_at(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		at: <span class="kw-2">&amp;</span>BlockId&lt;Block&gt;,
+		at: Hash,
 		validation_data: <span class="prelude-ty">Option</span>&lt;PersistedValidationData&lt;PHash, PBlockNumber&gt;&gt;,
 		relay_sproof_builder: RelayStateSproofBuilder,
 	) -&gt; BlockBuilder&lt;Block, Client, Backend&gt; {
@@ -322,7 +308,7 @@
 
 	<span class="kw">fn </span>init_block_builder_with_timestamp(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		at: <span class="kw-2">&amp;</span>BlockId&lt;Block&gt;,
+		at: Hash,
 		validation_data: <span class="prelude-ty">Option</span>&lt;PersistedValidationData&lt;PHash, PBlockNumber&gt;&gt;,
 		relay_sproof_builder: RelayStateSproofBuilder,
 		timestamp: u64,
@@ -353,4 +339,4 @@
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_test_client" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_test_client" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

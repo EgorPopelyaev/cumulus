@@ -1608,14 +1608,6 @@
 <a href="#1608" id="1608">1608</a>
 <a href="#1609" id="1609">1609</a>
 <a href="#1610" id="1610">1610</a>
-<a href="#1611" id="1611">1611</a>
-<a href="#1612" id="1612">1612</a>
-<a href="#1613" id="1613">1613</a>
-<a href="#1614" id="1614">1614</a>
-<a href="#1615" id="1615">1615</a>
-<a href="#1616" id="1616">1616</a>
-<a href="#1617" id="1617">1617</a>
-<a href="#1618" id="1618">1618</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -1638,16 +1630,15 @@
 <span class="kw">use </span>cumulus_client_consensus_common::{
 	ParachainBlockImport <span class="kw">as </span>TParachainBlockImport, ParachainCandidate, ParachainConsensus,
 };
-<span class="kw">use </span>cumulus_client_network::BlockAnnounceValidator;
 <span class="kw">use </span>cumulus_client_service::{
-	build_relay_chain_interface, prepare_node_config, start_collator, start_full_node,
-	StartCollatorParams, StartFullNodeParams,
+	build_network, build_relay_chain_interface, prepare_node_config, start_collator,
+	start_full_node, BuildNetworkParams, StartCollatorParams, StartFullNodeParams,
 };
 <span class="kw">use </span>cumulus_primitives_core::{
 	relay_chain::{Hash <span class="kw">as </span>PHash, PersistedValidationData},
 	ParaId,
 };
-<span class="kw">use </span>cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface};
+<span class="kw">use </span>cumulus_relay_chain_interface::RelayChainInterface;
 <span class="kw">use </span>sp_core::Pair;
 
 <span class="kw">use </span>jsonrpsee::RpcModule;
@@ -1662,17 +1653,15 @@
 	BlockImportParams, ImportQueue,
 };
 <span class="kw">use </span>sc_executor::WasmExecutor;
-<span class="kw">use </span>sc_network::NetworkService;
 <span class="kw">use </span>sc_network_common::service::NetworkBlock;
+<span class="kw">use </span>sc_network_sync::SyncingService;
 <span class="kw">use </span>sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 <span class="kw">use </span>sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 <span class="kw">use </span>sp_api::{ApiExt, ConstructRuntimeApi};
-<span class="kw">use </span>sp_consensus::CacheKeyId;
 <span class="kw">use </span>sp_consensus_aura::AuraApi;
 <span class="kw">use </span>sp_keystore::SyncCryptoStorePtr;
 <span class="kw">use </span>sp_runtime::{
 	app_crypto::AppKey,
-	generic::BlockId,
 	traits::{BlakeTwo256, Header <span class="kw">as </span>HeaderT},
 };
 <span class="kw">use </span>std::{marker::PhantomData, sync::Arc, time::Duration};
@@ -1979,7 +1968,7 @@
 		<span class="kw-2">&amp;</span>TaskManager,
 		Arc&lt;<span class="kw">dyn </span>RelayChainInterface&gt;,
 		Arc&lt;sc_transaction_pool::FullPool&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;&gt;,
-		Arc&lt;NetworkService&lt;Block, Hash&gt;&gt;,
+		Arc&lt;SyncingService&lt;Block&gt;&gt;,
 		SyncCryptoStorePtr,
 		bool,
 	) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ParachainConsensus&lt;Block&gt;&gt;, sc_service::Error&gt;,
@@ -2003,13 +1992,7 @@
 		hwbench.clone(),
 	)
 	.<span class="kw">await
-	</span>.map_err(|e| <span class="kw">match </span>e {
-		RelayChainError::ServiceError(polkadot_service::Error::Sub(x)) =&gt; x,
-		s =&gt; s.to_string().into(),
-	})<span class="question-mark">?</span>;
-
-	<span class="kw">let </span>block_announce_validator =
-		BlockAnnounceValidator::new(relay_chain_interface.clone(), para_id);
+	</span>.map_err(|e| sc_service::Error::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
 
 	<span class="kw">let </span>force_authoring = parachain_config.force_authoring;
 	<span class="kw">let </span>validator = parachain_config.role.is_authority();
@@ -2017,18 +2000,17 @@
 	<span class="kw">let </span>transaction_pool = params.transaction_pool.clone();
 	<span class="kw">let </span>import_queue_service = params.import_queue.service();
 
-	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network) =
-		sc_service::build_network(sc_service::BuildNetworkParams {
-			config: <span class="kw-2">&amp;</span>parachain_config,
+	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
+		build_network(BuildNetworkParams {
+			parachain_config: <span class="kw-2">&amp;</span>parachain_config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
+			para_id,
 			spawn_handle: task_manager.spawn_handle(),
+			relay_chain_interface: relay_chain_interface.clone(),
 			import_queue: params.import_queue,
-			block_announce_validator_builder: <span class="prelude-val">Some</span>(Box::new(|<span class="kw">_</span>| {
-				Box::new(block_announce_validator)
-			})),
-			warp_sync: <span class="prelude-val">None</span>,
-		})<span class="question-mark">?</span>;
+		})
+		.<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">let </span>rpc_client = client.clone();
 	<span class="kw">let </span>rpc_builder = Box::new(<span class="kw">move </span>|<span class="kw">_</span>, <span class="kw">_</span>| rpc_ext_builder(rpc_client.clone()));
@@ -2042,6 +2024,7 @@
 		keystore: params.keystore_container.sync_keystore(),
 		backend: backend.clone(),
 		network: network.clone(),
+		sync_service: sync_service.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
 		telemetry: telemetry.as_mut(),
@@ -2064,11 +2047,15 @@
 	}
 
 	<span class="kw">let </span>announce_block = {
-		<span class="kw">let </span>network = network.clone();
-		Arc::new(<span class="kw">move </span>|hash, data| network.announce_block(hash, data))
+		<span class="kw">let </span>sync_service = sync_service.clone();
+		Arc::new(<span class="kw">move </span>|hash, data| sync_service.announce_block(hash, data))
 	};
 
 	<span class="kw">let </span>relay_chain_slot_duration = Duration::from_secs(<span class="number">6</span>);
+
+	<span class="kw">let </span>overseer_handle = relay_chain_interface
+		.overseer_handle()
+		.map_err(|e| sc_service::Error::Application(Box::new(e)))<span class="question-mark">?</span>;
 
 	<span class="kw">if </span>validator {
 		<span class="kw">let </span>parachain_consensus = build_consensus(
@@ -2079,7 +2066,7 @@
 			<span class="kw-2">&amp;</span>task_manager,
 			relay_chain_interface.clone(),
 			transaction_pool,
-			network,
+			sync_service,
 			params.keystore_container.sync_keystore(),
 			force_authoring,
 		)<span class="question-mark">?</span>;
@@ -2098,6 +2085,7 @@
 			import_queue: import_queue_service,
 			collator_key: collator_key.expect(<span class="string">&quot;Command line arguments do not allow this. qed&quot;</span>),
 			relay_chain_slot_duration,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_collator(params).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2110,6 +2098,7 @@
 			relay_chain_interface,
 			relay_chain_slot_duration,
 			import_queue: import_queue_service,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_full_node(params)<span class="question-mark">?</span>;
@@ -2167,7 +2156,7 @@
 		<span class="kw-2">&amp;</span>TaskManager,
 		Arc&lt;<span class="kw">dyn </span>RelayChainInterface&gt;,
 		Arc&lt;sc_transaction_pool::FullPool&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;&gt;,
-		Arc&lt;NetworkService&lt;Block, Hash&gt;&gt;,
+		Arc&lt;SyncingService&lt;Block&gt;&gt;,
 		SyncCryptoStorePtr,
 		bool,
 	) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ParachainConsensus&lt;Block&gt;&gt;, sc_service::Error&gt;,
@@ -2190,13 +2179,7 @@
 		hwbench.clone(),
 	)
 	.<span class="kw">await
-	</span>.map_err(|e| <span class="kw">match </span>e {
-		RelayChainError::ServiceError(polkadot_service::Error::Sub(x)) =&gt; x,
-		s =&gt; s.to_string().into(),
-	})<span class="question-mark">?</span>;
-
-	<span class="kw">let </span>block_announce_validator =
-		BlockAnnounceValidator::new(relay_chain_interface.clone(), para_id);
+	</span>.map_err(|e| sc_service::Error::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
 
 	<span class="kw">let </span>force_authoring = parachain_config.force_authoring;
 	<span class="kw">let </span>validator = parachain_config.role.is_authority();
@@ -2204,18 +2187,17 @@
 	<span class="kw">let </span>transaction_pool = params.transaction_pool.clone();
 	<span class="kw">let </span>import_queue_service = params.import_queue.service();
 
-	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network) =
-		sc_service::build_network(sc_service::BuildNetworkParams {
-			config: <span class="kw-2">&amp;</span>parachain_config,
+	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
+		build_network(BuildNetworkParams {
+			parachain_config: <span class="kw-2">&amp;</span>parachain_config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
+			para_id,
 			spawn_handle: task_manager.spawn_handle(),
+			relay_chain_interface: relay_chain_interface.clone(),
 			import_queue: params.import_queue,
-			block_announce_validator_builder: <span class="prelude-val">Some</span>(Box::new(|<span class="kw">_</span>| {
-				Box::new(block_announce_validator)
-			})),
-			warp_sync: <span class="prelude-val">None</span>,
-		})<span class="question-mark">?</span>;
+		})
+		.<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">let </span>rpc_builder = {
 		<span class="kw">let </span>client = client.clone();
@@ -2242,6 +2224,7 @@
 		keystore: params.keystore_container.sync_keystore(),
 		backend: backend.clone(),
 		network: network.clone(),
+		sync_service: sync_service.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
 		telemetry: telemetry.as_mut(),
@@ -2264,12 +2247,15 @@
 	}
 
 	<span class="kw">let </span>announce_block = {
-		<span class="kw">let </span>network = network.clone();
-		Arc::new(<span class="kw">move </span>|hash, data| network.announce_block(hash, data))
+		<span class="kw">let </span>sync_service = sync_service.clone();
+		Arc::new(<span class="kw">move </span>|hash, data| sync_service.announce_block(hash, data))
 	};
 
 	<span class="kw">let </span>relay_chain_slot_duration = Duration::from_secs(<span class="number">6</span>);
 
+	<span class="kw">let </span>overseer_handle = relay_chain_interface
+		.overseer_handle()
+		.map_err(|e| sc_service::Error::Application(Box::new(e)))<span class="question-mark">?</span>;
 	<span class="kw">if </span>validator {
 		<span class="kw">let </span>parachain_consensus = build_consensus(
 			client.clone(),
@@ -2279,7 +2265,7 @@
 			<span class="kw-2">&amp;</span>task_manager,
 			relay_chain_interface.clone(),
 			transaction_pool,
-			network,
+			sync_service,
 			params.keystore_container.sync_keystore(),
 			force_authoring,
 		)<span class="question-mark">?</span>;
@@ -2298,6 +2284,7 @@
 			import_queue: import_queue_service,
 			collator_key: collator_key.expect(<span class="string">&quot;Command line arguments do not allow this. qed&quot;</span>),
 			relay_chain_slot_duration,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_collator(params).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2310,6 +2297,7 @@
 			relay_chain_interface,
 			relay_chain_slot_duration,
 			import_queue: import_queue_service,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_full_node(params)<span class="question-mark">?</span>;
@@ -2610,11 +2598,10 @@
 		relay_parent: PHash,
 		validation_data: <span class="kw-2">&amp;</span>PersistedValidationData,
 	) -&gt; <span class="prelude-ty">Option</span>&lt;ParachainCandidate&lt;Block&gt;&gt; {
-		<span class="kw">let </span>block_id = BlockId::hash(parent.hash());
 		<span class="kw">if </span><span class="self">self
 			</span>.client
 			.runtime_api()
-			.has_api::&lt;<span class="kw">dyn </span>AuraApi&lt;Block, AuraId&gt;&gt;(<span class="kw-2">&amp;</span>block_id)
+			.has_api::&lt;<span class="kw">dyn </span>AuraApi&lt;Block, AuraId&gt;&gt;(parent.hash())
 			.unwrap_or(<span class="bool-val">false</span>)
 		{
 			<span class="self">self</span>.aura_consensus
@@ -2650,13 +2637,11 @@
 	<span class="kw">async fn </span>verify(
 		<span class="kw-2">&amp;mut </span><span class="self">self</span>,
 		block_import: BlockImportParams&lt;Block, ()&gt;,
-	) -&gt; <span class="prelude-ty">Result</span>&lt;(BlockImportParams&lt;Block, ()&gt;, <span class="prelude-ty">Option</span>&lt;Vec&lt;(CacheKeyId, Vec&lt;u8&gt;)&gt;&gt;), String&gt; {
-		<span class="kw">let </span>block_id = BlockId::hash(<span class="kw-2">*</span>block_import.header.parent_hash());
-
+	) -&gt; <span class="prelude-ty">Result</span>&lt;BlockImportParams&lt;Block, ()&gt;, String&gt; {
 		<span class="kw">if </span><span class="self">self
 			</span>.client
 			.runtime_api()
-			.has_api::&lt;<span class="kw">dyn </span>AuraApi&lt;Block, AuraId&gt;&gt;(<span class="kw-2">&amp;</span>block_id)
+			.has_api::&lt;<span class="kw">dyn </span>AuraApi&lt;Block, AuraId&gt;&gt;(<span class="kw-2">*</span>block_import.header.parent_hash())
 			.unwrap_or(<span class="bool-val">false</span>)
 		{
 			<span class="self">self</span>.aura_verifier.get_mut().verify(block_import).<span class="kw">await
@@ -2941,7 +2926,7 @@
 		<span class="kw-2">&amp;</span>TaskManager,
 		Arc&lt;<span class="kw">dyn </span>RelayChainInterface&gt;,
 		Arc&lt;sc_transaction_pool::FullPool&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;&gt;,
-		Arc&lt;NetworkService&lt;Block, Hash&gt;&gt;,
+		Arc&lt;SyncingService&lt;Block&gt;&gt;,
 		SyncCryptoStorePtr,
 		bool,
 	) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ParachainConsensus&lt;Block&gt;&gt;, sc_service::Error&gt;,
@@ -2964,13 +2949,7 @@
 		hwbench.clone(),
 	)
 	.<span class="kw">await
-	</span>.map_err(|e| <span class="kw">match </span>e {
-		RelayChainError::ServiceError(polkadot_service::Error::Sub(x)) =&gt; x,
-		s =&gt; s.to_string().into(),
-	})<span class="question-mark">?</span>;
-
-	<span class="kw">let </span>block_announce_validator =
-		BlockAnnounceValidator::new(relay_chain_interface.clone(), para_id);
+	</span>.map_err(|e| sc_service::Error::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
 
 	<span class="kw">let </span>force_authoring = parachain_config.force_authoring;
 	<span class="kw">let </span>validator = parachain_config.role.is_authority();
@@ -2978,18 +2957,17 @@
 	<span class="kw">let </span>transaction_pool = params.transaction_pool.clone();
 	<span class="kw">let </span>import_queue_service = params.import_queue.service();
 
-	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network) =
-		sc_service::build_network(sc_service::BuildNetworkParams {
-			config: <span class="kw-2">&amp;</span>parachain_config,
+	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
+		build_network(BuildNetworkParams {
+			parachain_config: <span class="kw-2">&amp;</span>parachain_config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
+			para_id,
 			spawn_handle: task_manager.spawn_handle(),
+			relay_chain_interface: relay_chain_interface.clone(),
 			import_queue: params.import_queue,
-			block_announce_validator_builder: <span class="prelude-val">Some</span>(Box::new(|<span class="kw">_</span>| {
-				Box::new(block_announce_validator)
-			})),
-			warp_sync: <span class="prelude-val">None</span>,
-		})<span class="question-mark">?</span>;
+		})
+		.<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">let </span>rpc_builder = {
 		<span class="kw">let </span>client = client.clone();
@@ -3015,6 +2993,7 @@
 		keystore: params.keystore_container.sync_keystore(),
 		backend: backend.clone(),
 		network: network.clone(),
+		sync_service: sync_service.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
 		telemetry: telemetry.as_mut(),
@@ -3037,12 +3016,15 @@
 	}
 
 	<span class="kw">let </span>announce_block = {
-		<span class="kw">let </span>network = network.clone();
-		Arc::new(<span class="kw">move </span>|hash, data| network.announce_block(hash, data))
+		<span class="kw">let </span>sync_service = sync_service.clone();
+		Arc::new(<span class="kw">move </span>|hash, data| sync_service.announce_block(hash, data))
 	};
 
 	<span class="kw">let </span>relay_chain_slot_duration = Duration::from_secs(<span class="number">6</span>);
 
+	<span class="kw">let </span>overseer_handle = relay_chain_interface
+		.overseer_handle()
+		.map_err(|e| sc_service::Error::Application(Box::new(e)))<span class="question-mark">?</span>;
 	<span class="kw">if </span>validator {
 		<span class="kw">let </span>parachain_consensus = build_consensus(
 			client.clone(),
@@ -3052,7 +3034,7 @@
 			<span class="kw-2">&amp;</span>task_manager,
 			relay_chain_interface.clone(),
 			transaction_pool,
-			network,
+			sync_service,
 			params.keystore_container.sync_keystore(),
 			force_authoring,
 		)<span class="question-mark">?</span>;
@@ -3071,6 +3053,7 @@
 			import_queue: import_queue_service,
 			collator_key: collator_key.expect(<span class="string">&quot;Command line arguments do not allow this. qed&quot;</span>),
 			relay_chain_slot_duration,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_collator(params).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -3083,6 +3066,7 @@
 			relay_chain_interface,
 			relay_chain_slot_duration,
 			import_queue: import_queue_service,
+			recovery_handle: Box::new(overseer_handle),
 		};
 
 		start_full_node(params)<span class="question-mark">?</span>;
@@ -3235,4 +3219,4 @@
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="polkadot_parachain" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="polkadot_parachain" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

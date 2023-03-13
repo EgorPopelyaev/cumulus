@@ -232,8 +232,8 @@
 			suspend_threshold: pre.suspend_threshold,
 			drop_threshold: pre.drop_threshold,
 			resume_threshold: pre.resume_threshold,
-			threshold_weight: Weight::from_ref_time(pre.threshold_weight),
-			weight_restrict_decay: Weight::from_ref_time(pre.weight_restrict_decay),
+			threshold_weight: Weight::from_parts(pre.threshold_weight, <span class="number">0</span>),
+			weight_restrict_decay: Weight::from_parts(pre.weight_restrict_decay, <span class="number">0</span>),
 			xcmp_max_individual_weight: Weight::from_parts(
 				pre.xcmp_max_individual_weight,
 				DEFAULT_POV_SIZE,
@@ -293,4 +293,4 @@
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_pallet_xcmp_queue" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_pallet_xcmp_queue" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

@@ -472,6 +472,12 @@
 <a href="#472" id="472">472</a>
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -488,30 +494,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::reconnecting_ws_client::ReconnectingWsClient;
+</span><span class="kw">use </span>futures::channel::mpsc::Receiver;
+<span class="kw">use </span>jsonrpsee::{core::params::ArrayParams, rpc_params};
+<span class="kw">use </span>parity_scale_codec::{Decode, Encode};
+<span class="kw">use </span>serde::de::DeserializeOwned;
+<span class="kw">pub use </span>url::Url;
+
+<span class="kw">use </span>sc_client_api::StorageData;
+<span class="kw">use </span>sc_rpc_api::{state::ReadProof, system::Health};
+<span class="kw">use </span>sc_service::TaskManager;
+<span class="kw">use </span>sp_api::RuntimeVersion;
+<span class="kw">use </span>sp_consensus_babe::Epoch;
+<span class="kw">use </span>sp_core::sp_std::collections::btree_map::BTreeMap;
+<span class="kw">use </span>sp_storage::StorageKey;
+
 <span class="kw">use </span>cumulus_primitives_core::{
 	relay_chain::{
-		CandidateCommitments, CandidateEvent, CandidateHash, CommittedCandidateReceipt, CoreState,
-		DisputeState, GroupRotationInfo, Hash <span class="kw">as </span>RelayHash, Header <span class="kw">as </span>RelayHeader,
-		InboundHrmpMessage, OccupiedCoreAssumption, OldV1SessionInfo, PvfCheckStatement,
+		vstaging::ExecutorParams, BlockNumber, CandidateCommitments, CandidateEvent, CandidateHash,
+		CommittedCandidateReceipt, CoreState, DisputeState, GroupRotationInfo, Hash <span class="kw">as </span>RelayHash,
+		Header <span class="kw">as </span>RelayHeader, InboundHrmpMessage, OccupiedCoreAssumption, PvfCheckStatement,
 		ScrapedOnChainVotes, SessionIndex, SessionInfo, ValidationCode, ValidationCodeHash,
 		ValidatorId, ValidatorIndex, ValidatorSignature,
 	},
 	InboundDownwardMessage, ParaId, PersistedValidationData,
 };
 <span class="kw">use </span>cumulus_relay_chain_interface::{RelayChainError, RelayChainResult};
-<span class="kw">use </span>futures::channel::mpsc::Receiver;
-<span class="kw">use </span>jsonrpsee::{core::params::ArrayParams, rpc_params};
-<span class="kw">use </span>parity_scale_codec::{Decode, Encode};
-<span class="kw">use </span>polkadot_service::{BlockNumber, TaskManager};
-<span class="kw">use </span>sc_client_api::StorageData;
-<span class="kw">use </span>sc_rpc_api::{state::ReadProof, system::Health};
-<span class="kw">use </span>serde::de::DeserializeOwned;
-<span class="kw">use </span>sp_api::RuntimeVersion;
-<span class="kw">use </span>sp_consensus_babe::Epoch;
-<span class="kw">use </span>sp_core::sp_std::collections::btree_map::BTreeMap;
-<span class="kw">use </span>sp_storage::StorageKey;
-<span class="kw">pub use </span>url::Url;
+
+<span class="kw">use </span><span class="kw">crate</span>::reconnecting_ws_client::ReconnectingWsClient;
 
 <span class="kw">const </span>LOG_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">&quot;relay-chain-rpc-client&quot;</span>;
 
@@ -607,17 +616,6 @@
 	<span class="doccomment">/// Returns information regarding the current epoch.
 	</span><span class="kw">pub async fn </span>babe_api_current_epoch(<span class="kw-2">&amp;</span><span class="self">self</span>, at: RelayHash) -&gt; <span class="prelude-ty">Result</span>&lt;Epoch, RelayChainError&gt; {
 		<span class="self">self</span>.call_remote_runtime_function(<span class="string">&quot;BabeApi_current_epoch&quot;</span>, at, <span class="prelude-val">None</span>::&lt;()&gt;).<span class="kw">await
-	</span>}
-
-	<span class="doccomment">/// Old method to fetch v1 session info.
-	</span><span class="kw">pub async fn </span>parachain_host_session_info_before_version_2(
-		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		at: RelayHash,
-		index: SessionIndex,
-	) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;OldV1SessionInfo&gt;, RelayChainError&gt; {
-		<span class="comment">// The function in wasm never changes/gets augmented with a version
-		</span><span class="self">self</span>.call_remote_runtime_function(<span class="string">&quot;ParachainHost_session_info&quot;</span>, at, <span class="prelude-val">Some</span>(index))
-			.<span class="kw">await
 	</span>}
 
 	<span class="doccomment">/// Scrape dispute relevant from on-chain, backing votes and resolved disputes.
@@ -746,7 +744,7 @@
 	<span class="doccomment">/// Get hash of n-th block.
 	</span><span class="kw">pub async fn </span>chain_get_block_hash(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		block_number: <span class="prelude-ty">Option</span>&lt;polkadot_service::BlockNumber&gt;,
+		block_number: <span class="prelude-ty">Option</span>&lt;BlockNumber&gt;,
 	) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;RelayHash&gt;, RelayChainError&gt; {
 		<span class="kw">let </span>params = <span class="macro">rpc_params!</span>[block_number];
 		<span class="self">self</span>.request(<span class="string">&quot;chain_getBlockHash&quot;</span>, params).<span class="kw">await
@@ -862,6 +860,20 @@
 			.<span class="kw">await
 	</span>}
 
+	<span class="doccomment">/// Get the executor parameters for the given session, if stored
+	</span><span class="kw">pub async fn </span>parachain_host_session_executor_params(
+		<span class="kw-2">&amp;</span><span class="self">self</span>,
+		at: RelayHash,
+		session_index: SessionIndex,
+	) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ExecutorParams&gt;, RelayChainError&gt; {
+		<span class="self">self</span>.call_remote_runtime_function(
+			<span class="string">&quot;ParachainHost_session_executor_params&quot;</span>,
+			at,
+			<span class="prelude-val">Some</span>(session_index),
+		)
+		.<span class="kw">await
+	</span>}
+
 	<span class="doccomment">/// Get header at specified hash
 	</span><span class="kw">pub async fn </span>chain_get_header(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -947,4 +959,4 @@
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_relay_chain_rpc_interface" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_relay_chain_rpc_interface" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

@@ -831,6 +831,54 @@
 <a href="#831" id="831">831</a>
 <a href="#832" id="832">832</a>
 <a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -866,9 +914,10 @@
 <span class="kw">use </span>cumulus_client_consensus_common::{
 	ParachainBlockImport <span class="kw">as </span>TParachainBlockImport, ParachainCandidate, ParachainConsensus,
 };
-<span class="kw">use </span>cumulus_client_network::BlockAnnounceValidator;
+<span class="kw">use </span>cumulus_client_pov_recovery::RecoveryHandle;
 <span class="kw">use </span>cumulus_client_service::{
-	prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams,
+	build_network, prepare_node_config, start_collator, start_full_node, BuildNetworkParams,
+	StartCollatorParams, StartFullNodeParams,
 };
 <span class="kw">use </span>cumulus_primitives_core::ParaId;
 <span class="kw">use </span>cumulus_relay_chain_inprocess_interface::RelayChainInProcessInterface;
@@ -878,6 +927,8 @@
 <span class="kw">use </span>cumulus_test_runtime::{Hash, Header, NodeBlock <span class="kw">as </span>Block, RuntimeApi};
 
 <span class="kw">use </span>frame_system_rpc_runtime_api::AccountNonceApi;
+<span class="kw">use </span>polkadot_node_subsystem::{errors::RecoveryError, messages::AvailabilityRecoveryMessage};
+<span class="kw">use </span>polkadot_overseer::Handle <span class="kw">as </span>OverseerHandle;
 <span class="kw">use </span>polkadot_primitives::{CollatorPair, Hash <span class="kw">as </span>PHash, PersistedValidationData};
 <span class="kw">use </span>polkadot_service::ProvideRuntimeApi;
 <span class="kw">use </span>sc_client_api::execution_extensions::ExecutionStrategies;
@@ -908,6 +959,8 @@
 <span class="kw">pub use </span>cumulus_test_runtime <span class="kw">as </span>runtime;
 <span class="kw">pub use </span>genesis::<span class="kw-2">*</span>;
 <span class="kw">pub use </span>sp_keyring::Sr25519Keyring <span class="kw">as </span>Keyring;
+
+<span class="kw">const </span>LOG_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">&quot;cumulus-test-service&quot;</span>;
 
 <span class="doccomment">/// A consensus that will never produce any block.
 </span><span class="attr">#[derive(Clone)]
@@ -958,6 +1011,41 @@
 
 <span class="doccomment">/// Transaction pool type used by the test service
 </span><span class="kw">pub type </span>TransactionPool = Arc&lt;sc_transaction_pool::FullPool&lt;Block, Client&gt;&gt;;
+
+<span class="doccomment">/// Recovery handle that fails regularly to simulate unavailable povs.
+</span><span class="kw">pub struct </span>FailingRecoveryHandle {
+	overseer_handle: OverseerHandle,
+	counter: u32,
+}
+
+<span class="kw">impl </span>FailingRecoveryHandle {
+	<span class="doccomment">/// Create a new FailingRecoveryHandle
+	</span><span class="kw">pub fn </span>new(overseer_handle: OverseerHandle) -&gt; <span class="self">Self </span>{
+		<span class="self">Self </span>{ overseer_handle, counter: <span class="number">0 </span>}
+	}
+}
+
+<span class="attr">#[async_trait::async_trait]
+</span><span class="kw">impl </span>RecoveryHandle <span class="kw">for </span>FailingRecoveryHandle {
+	<span class="kw">async fn </span>send_recovery_msg(
+		<span class="kw-2">&amp;mut </span><span class="self">self</span>,
+		message: AvailabilityRecoveryMessage,
+		origin: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+	) {
+		<span class="comment">// For every 5th block we immediately signal unavailability to trigger
+		// a retry.
+		</span><span class="kw">if </span><span class="self">self</span>.counter % <span class="number">5 </span>== <span class="number">0 </span>{
+			<span class="kw">let </span>AvailabilityRecoveryMessage::RecoverAvailableData(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, back_sender) = message;
+			<span class="macro">tracing::info!</span>(target: LOG_TARGET, <span class="string">&quot;Failing pov recovery.&quot;</span>);
+			back_sender
+				.send(<span class="prelude-val">Err</span>(RecoveryError::Unavailable))
+				.expect(<span class="string">&quot;Return channel should work here.&quot;</span>);
+		} <span class="kw">else </span>{
+			<span class="self">self</span>.overseer_handle.send_msg(message, origin).<span class="kw">await</span>;
+		}
+		<span class="self">self</span>.counter += <span class="number">1</span>;
+	}
+}
 
 <span class="doccomment">/// Starts a `ServiceBuilder` for a full service.
 ///
@@ -1045,14 +1133,15 @@
 			polkadot_service::IsCollator::Yes(CollatorPair::generate().<span class="number">0</span>)
 		},
 		<span class="prelude-val">None</span>,
-	)<span class="question-mark">?</span>;
+	)
+	.map_err(|e| RelayChainError::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
 
 	task_manager.add_child(relay_chain_full_node.task_manager);
 	<span class="macro">tracing::info!</span>(<span class="string">&quot;Using inprocess node.&quot;</span>);
 	<span class="prelude-val">Ok</span>(Arc::new(RelayChainInProcessInterface::new(
 		relay_chain_full_node.client.clone(),
 		relay_chain_full_node.backend.clone(),
-		Arc::new(relay_chain_full_node.network.clone()),
+		relay_chain_full_node.sync_service.clone(),
 		relay_chain_full_node.overseer_handle.ok_or(RelayChainError::GenericError(
 			<span class="string">&quot;Overseer should be running in full node.&quot;</span>.to_string(),
 		))<span class="question-mark">?</span>,
@@ -1069,6 +1158,7 @@
 	relay_chain_config: Configuration,
 	para_id: ParaId,
 	wrap_announce_block: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>FnOnce(AnnounceBlockFn) -&gt; AnnounceBlockFn&gt;&gt;,
+	fail_pov_recovery: bool,
 	rpc_ext_builder: RB,
 	consensus: Consensus,
 	collator_options: CollatorOptions,
@@ -1101,28 +1191,22 @@
 		<span class="kw-2">&amp;mut </span>task_manager,
 	)
 	.<span class="kw">await
-	</span>.map_err(|e| <span class="kw">match </span>e {
-		RelayChainError::ServiceError(polkadot_service::Error::Sub(x)) =&gt; x,
-		s =&gt; s.to_string().into(),
-	})<span class="question-mark">?</span>;
+	</span>.map_err(|e| sc_service::Error::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
 
-	<span class="kw">let </span>block_announce_validator =
-		BlockAnnounceValidator::new(relay_chain_interface.clone(), para_id);
-	<span class="kw">let </span>block_announce_validator_builder = <span class="kw">move </span>|<span class="kw">_</span>| Box::new(block_announce_validator) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;;
-
-	<span class="kw">let </span>prometheus_registry = parachain_config.prometheus_registry().cloned();
 	<span class="kw">let </span>import_queue_service = params.import_queue.service();
-
-	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network) =
-		sc_service::build_network(sc_service::BuildNetworkParams {
-			config: <span class="kw-2">&amp;</span>parachain_config,
+	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
+		build_network(BuildNetworkParams {
+			parachain_config: <span class="kw-2">&amp;</span>parachain_config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
+			para_id,
 			spawn_handle: task_manager.spawn_handle(),
+			relay_chain_interface: relay_chain_interface.clone(),
 			import_queue: params.import_queue,
-			block_announce_validator_builder: <span class="prelude-val">Some</span>(Box::new(block_announce_validator_builder)),
-			warp_sync: <span class="prelude-val">None</span>,
-		})<span class="question-mark">?</span>;
+		})
+		.<span class="kw">await</span><span class="question-mark">?</span>;
+
+	<span class="kw">let </span>prometheus_registry = parachain_config.prometheus_registry().cloned();
 
 	<span class="kw">let </span>rpc_builder = {
 		<span class="kw">let </span>client = client.clone();
@@ -1138,14 +1222,15 @@
 		keystore: params.keystore_container.sync_keystore(),
 		backend: backend.clone(),
 		network: network.clone(),
+		sync_service: sync_service.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
 		telemetry: <span class="prelude-val">None</span>,
 	})<span class="question-mark">?</span>;
 
 	<span class="kw">let </span>announce_block = {
-		<span class="kw">let </span>network = network.clone();
-		Arc::new(<span class="kw">move </span>|hash, data| network.announce_block(hash, data))
+		<span class="kw">let </span>sync_service = sync_service.clone();
+		Arc::new(<span class="kw">move </span>|hash, data| sync_service.announce_block(hash, data))
 	};
 
 	<span class="kw">let </span>announce_block = wrap_announce_block
@@ -1153,6 +1238,17 @@
 		.unwrap_or_else(|| announce_block);
 
 	<span class="kw">let </span>relay_chain_interface_for_closure = relay_chain_interface.clone();
+
+	<span class="kw">let </span>overseer_handle = relay_chain_interface
+		.overseer_handle()
+		.map_err(|e| sc_service::Error::Application(Box::new(e)))<span class="question-mark">?</span>;
+
+	<span class="kw">let </span>recovery_handle: Box&lt;<span class="kw">dyn </span>RecoveryHandle&gt; = <span class="kw">if </span>fail_pov_recovery {
+		Box::new(FailingRecoveryHandle::new(overseer_handle))
+	} <span class="kw">else </span>{
+		Box::new(overseer_handle)
+	};
+
 	<span class="kw">if let </span><span class="prelude-val">Some</span>(collator_key) = collator_key {
 		<span class="kw">let </span>parachain_consensus: Box&lt;<span class="kw">dyn </span>ParachainConsensus&lt;Block&gt;&gt; = <span class="kw">match </span>consensus {
 			Consensus::RelayChain =&gt; {
@@ -1207,6 +1303,7 @@
 			collator_key,
 			import_queue: import_queue_service,
 			relay_chain_slot_duration: Duration::from_secs(<span class="number">6</span>),
+			recovery_handle,
 		};
 
 		start_collator(params).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1218,10 +1315,8 @@
 			para_id,
 			relay_chain_interface,
 			import_queue: import_queue_service,
-			<span class="comment">// The slot duration is currently used internally only to configure
-			// the recovery delay of pov-recovery. We don&#39;t want to wait for too
-			// long on the full node to recover, so we reduce this time here.
-			</span>relay_chain_slot_duration: Duration::from_millis(<span class="number">6</span>),
+			relay_chain_slot_duration: Duration::from_secs(<span class="number">6</span>),
+			recovery_handle,
 		};
 
 		start_full_node(params)<span class="question-mark">?</span>;
@@ -1433,6 +1528,7 @@
 			relay_chain_config,
 			<span class="self">self</span>.para_id,
 			<span class="self">self</span>.wrap_announce_block,
+			<span class="bool-val">false</span>,
 			|<span class="kw">_</span>| <span class="prelude-val">Ok</span>(jsonrpsee::RpcModule::new(())),
 			<span class="self">self</span>.consensus,
 			collator_options,
@@ -1575,7 +1671,7 @@
 		<span class="self">self</span>.send_extrinsic(
 			runtime::SudoCall::sudo_unchecked_weight {
 				call: Box::new(call.into()),
-				weight: Weight::from_ref_time(<span class="number">1_000</span>),
+				weight: Weight::from_parts(<span class="number">1_000</span>, <span class="number">0</span>),
 			},
 			Sr25519Keyring::Alice,
 		)
@@ -1589,7 +1685,7 @@
 	<span class="kw">let </span>best_hash = client.chain_info().best_hash;
 	client
 		.runtime_api()
-		.account_nonce(<span class="kw-2">&amp;</span>generic::BlockId::Hash(best_hash), account.into())
+		.account_nonce(best_hash, account.into())
 		.expect(<span class="string">&quot;Fetching account nonce works; qed&quot;</span>)
 }
 
@@ -1665,4 +1761,4 @@
 	)
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_test_service" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_test_service" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

@@ -252,9 +252,6 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 Parity Technologies (UK) Ltd.
 // This file is part of Polkadot.
 
@@ -271,8 +268,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Polkadot.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
-</span><span class="kw">use </span>cumulus_relay_chain_interface::RelayChainError;
+</span><span class="kw">use </span>futures::{select, StreamExt};
 <span class="kw">use </span>lru::LruCache;
+<span class="kw">use </span>std::sync::Arc;
+
 <span class="kw">use </span>polkadot_node_network_protocol::{
 	peer_set::PeerSetProtocolNames,
 	request_response::{
@@ -282,8 +281,8 @@
 };
 <span class="kw">use </span>polkadot_node_subsystem_util::metrics::{prometheus::Registry, Metrics};
 <span class="kw">use </span>polkadot_overseer::{
-	BlockInfo, DummySubsystem, MetricsTrait, Overseer, OverseerHandle, OverseerMetrics, SpawnGlue,
-	KNOWN_LEAVES_CACHE_SIZE,
+	BlockInfo, DummySubsystem, Handle, MetricsTrait, Overseer, OverseerHandle, OverseerMetrics,
+	SpawnGlue, KNOWN_LEAVES_CACHE_SIZE,
 };
 <span class="kw">use </span>polkadot_primitives::CollatorPair;
 <span class="kw">use </span>polkadot_service::{
@@ -294,18 +293,16 @@
 	},
 	Error, OverseerConnector,
 };
+
 <span class="kw">use </span>sc_authority_discovery::Service <span class="kw">as </span>AuthorityDiscoveryService;
 <span class="kw">use </span>sc_network::NetworkStateInfo;
-
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>sc_service::TaskManager;
+<span class="kw">use </span>sp_runtime::traits::Block <span class="kw">as </span>BlockT;
 
 <span class="kw">use </span>cumulus_primitives_core::relay_chain::{Block, Hash <span class="kw">as </span>PHash};
-
-<span class="kw">use </span>polkadot_service::{Handle, TaskManager};
+<span class="kw">use </span>cumulus_relay_chain_interface::RelayChainError;
 
 <span class="kw">use </span><span class="kw">crate</span>::BlockChainRpcClient;
-<span class="kw">use </span>futures::{select, StreamExt};
-<span class="kw">use </span>sp_runtime::traits::Block <span class="kw">as </span>BlockT;
 
 <span class="doccomment">/// Arguments passed for overseer construction.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CollatorOverseerGenArgs&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -313,6 +310,8 @@
 	</span><span class="kw">pub </span>runtime_client: Arc&lt;BlockChainRpcClient&gt;,
 	<span class="doccomment">/// Underlying network service implementation.
 	</span><span class="kw">pub </span>network_service: Arc&lt;sc_network::NetworkService&lt;Block, PHash&gt;&gt;,
+	<span class="doccomment">/// Syncing oracle.
+	</span><span class="kw">pub </span>sync_oracle: Box&lt;<span class="kw">dyn </span>sp_consensus::SyncOracle + Send&gt;,
 	<span class="doccomment">/// Underlying authority discovery service.
 	</span><span class="kw">pub </span>authority_discovery_service: AuthorityDiscoveryService,
 	<span class="doccomment">/// Receiver for collation request protocol
@@ -336,6 +335,7 @@
 	CollatorOverseerGenArgs {
 		runtime_client,
 		network_service,
+		sync_oracle,
 		authority_discovery_service,
 		collation_req_receiver,
 		available_data_req_receiver,
@@ -349,7 +349,6 @@
 	(Overseer&lt;SpawnGlue&lt;sc_service::SpawnTaskHandle&gt;, Arc&lt;BlockChainRpcClient&gt;&gt;, OverseerHandle),
 	Error,
 &gt; {
-	<span class="kw">let </span>leaves = Vec::new();
 	<span class="kw">let </span>metrics = &lt;OverseerMetrics <span class="kw">as </span>MetricsTrait&gt;::register(registry)<span class="question-mark">?</span>;
 	<span class="kw">let </span>spawner = SpawnGlue(spawner);
 	<span class="kw">let </span>network_bridge_metrics: NetworkBridgeMetrics = Metrics::register(registry)<span class="question-mark">?</span>;
@@ -379,7 +378,7 @@
 		.network_bridge_rx(NetworkBridgeRxSubsystem::new(
 			network_service.clone(),
 			authority_discovery_service.clone(),
-			Box::new(network_service.clone()),
+			sync_oracle,
 			network_bridge_metrics.clone(),
 			peer_set_protocol_names.clone(),
 		))
@@ -403,11 +402,6 @@
 		.dispute_coordinator(DummySubsystem)
 		.dispute_distribution(DummySubsystem)
 		.chain_selection(DummySubsystem)
-		.leaves(Vec::from_iter(
-			leaves
-				.into_iter()
-				.map(|BlockInfo { hash, parent_hash: <span class="kw">_</span>, number }| (hash, number)),
-		))
 		.activation_external_listeners(Default::default())
 		.span_per_active_leaf(Default::default())
 		.active_leaves(Default::default())
@@ -513,4 +507,4 @@
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_relay_chain_minimal_node" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_relay_chain_minimal_node" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
