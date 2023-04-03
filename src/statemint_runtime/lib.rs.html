@@ -1133,6 +1133,27 @@
 <a href="#1133" id="1133">1133</a>
 <a href="#1134" id="1134">1134</a>
 <a href="#1135" id="1135">1135</a>
+<a href="#1136" id="1136">1136</a>
+<a href="#1137" id="1137">1137</a>
+<a href="#1138" id="1138">1138</a>
+<a href="#1139" id="1139">1139</a>
+<a href="#1140" id="1140">1140</a>
+<a href="#1141" id="1141">1141</a>
+<a href="#1142" id="1142">1142</a>
+<a href="#1143" id="1143">1143</a>
+<a href="#1144" id="1144">1144</a>
+<a href="#1145" id="1145">1145</a>
+<a href="#1146" id="1146">1146</a>
+<a href="#1147" id="1147">1147</a>
+<a href="#1148" id="1148">1148</a>
+<a href="#1149" id="1149">1149</a>
+<a href="#1150" id="1150">1150</a>
+<a href="#1151" id="1151">1151</a>
+<a href="#1152" id="1152">1152</a>
+<a href="#1153" id="1153">1153</a>
+<a href="#1154" id="1154">1154</a>
+<a href="#1155" id="1155">1155</a>
+<a href="#1156" id="1156">1156</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021-2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1229,14 +1250,15 @@
 	NORMAL_DISPATCH_RATIO, SLOT_DURATION,
 };
 <span class="kw">use </span>xcm_config::{
-	DotLocation, TrustBackedAssetsConvertedConcreteId, XcmConfig, XcmOriginToTransactDispatchOrigin,
+	DotLocation, FellowshipLocation, GovernanceLocation, TrustBackedAssetsConvertedConcreteId,
+	XcmConfig, XcmOriginToTransactDispatchOrigin,
 };
 
 <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
 </span><span class="kw">pub use </span>sp_runtime::BuildStorage;
 
 <span class="comment">// Polkadot imports
-</span><span class="kw">use </span>pallet_xcm::{EnsureXcm, IsMajorityOfBody};
+</span><span class="kw">use </span>pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 <span class="kw">use </span>polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 <span class="kw">use </span>xcm::latest::BodyId;
 <span class="kw">use </span>xcm_executor::XcmExecutor;
@@ -1349,6 +1371,10 @@
 	<span class="kw">type </span>WeightInfo = weights::pallet_balances::WeightInfo&lt;Runtime&gt;;
 	<span class="kw">type </span>MaxReserves = ConstU32&lt;<span class="number">50</span>&gt;;
 	<span class="kw">type </span>ReserveIdentifier = [u8; <span class="number">8</span>];
+	<span class="kw">type </span>HoldIdentifier = ();
+	<span class="kw">type </span>FreezeIdentifier = ();
+	<span class="kw">type </span>MaxHolds = ConstU32&lt;<span class="number">0</span>&gt;;
+	<span class="kw">type </span>MaxFreezes = ConstU32&lt;<span class="number">0</span>&gt;;
 }
 
 <span class="macro">parameter_types! </span>{
@@ -1375,12 +1401,10 @@
 	</span><span class="comment">// https://github.com/paritytech/substrate/blob/069917b/frame/assets/src/lib.rs#L257L271
 	</span><span class="kw">pub const </span>MetadataDepositBase: Balance = deposit(<span class="number">1</span>, <span class="number">68</span>);
 	<span class="kw">pub const </span>MetadataDepositPerByte: Balance = deposit(<span class="number">0</span>, <span class="number">1</span>);
-	<span class="kw">pub const </span>ExecutiveBody: BodyId = BodyId::Executive;
 }
 
-<span class="doccomment">/// We allow root and the Relay Chain council to execute privileged asset operations.
-</span><span class="kw">pub type </span>AssetsForceOrigin =
-	EitherOfDiverse&lt;EnsureRoot&lt;AccountId&gt;, EnsureXcm&lt;IsMajorityOfBody&lt;DotLocation, ExecutiveBody&gt;&gt;&gt;;
+<span class="doccomment">/// We allow root to execute privileged asset operations.
+</span><span class="kw">pub type </span>AssetsForceOrigin = EnsureRoot&lt;AccountId&gt;;
 
 <span class="comment">// Called &quot;Trust Backed&quot; assets because these are generally registered by some account, and users of
 // the asset assume it has some claimed backing. The pallet is called `Assets` in
@@ -1607,6 +1631,11 @@
 
 <span class="kw">impl </span>cumulus_pallet_aura_ext::Config <span class="kw">for </span>Runtime {}
 
+<span class="macro">parameter_types! </span>{
+	<span class="comment">// Fellows pluralistic body.
+	</span><span class="kw">pub const </span>FellowsBodyId: BodyId = BodyId::Technical;
+}
+
 <span class="kw">impl </span>cumulus_pallet_xcmp_queue::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>WeightInfo = weights::cumulus_pallet_xcmp_queue::WeightInfo&lt;Runtime&gt;;
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
@@ -1616,7 +1645,7 @@
 	<span class="kw">type </span>ExecuteOverweightOrigin = EnsureRoot&lt;AccountId&gt;;
 	<span class="kw">type </span>ControllerOrigin = EitherOfDiverse&lt;
 		EnsureRoot&lt;AccountId&gt;,
-		EnsureXcm&lt;IsMajorityOfBody&lt;DotLocation, ExecutiveBody&gt;&gt;,
+		EnsureXcm&lt;IsVoiceOfBody&lt;FellowshipLocation, FellowsBodyId&gt;&gt;,
 	&gt;;
 	<span class="kw">type </span>ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	<span class="kw">type </span>PriceForSiblingDelivery = ();
@@ -1659,11 +1688,15 @@
 	<span class="kw">pub const </span>MinCandidates: u32 = <span class="number">5</span>;
 	<span class="kw">pub const </span>SessionLength: BlockNumber = <span class="number">6 </span>* HOURS;
 	<span class="kw">pub const </span>MaxInvulnerables: u32 = <span class="number">100</span>;
+	<span class="comment">// `StakingAdmin` pluralistic body.
+	</span><span class="kw">pub const </span>StakingAdminBodyId: BodyId = BodyId::Defense;
 }
 
-<span class="doccomment">/// We allow root and the Relay Chain council to execute privileged collator selection operations.
-</span><span class="kw">pub type </span>CollatorSelectionUpdateOrigin =
-	EitherOfDiverse&lt;EnsureRoot&lt;AccountId&gt;, EnsureXcm&lt;IsMajorityOfBody&lt;DotLocation, ExecutiveBody&gt;&gt;&gt;;
+<span class="doccomment">/// We allow root and the `StakingAdmin` to execute privileged collator selection operations.
+</span><span class="kw">pub type </span>CollatorSelectionUpdateOrigin = EitherOfDiverse&lt;
+	EnsureRoot&lt;AccountId&gt;,
+	EnsureXcm&lt;IsVoiceOfBody&lt;GovernanceLocation, StakingAdminBodyId&gt;&gt;,
+&gt;;
 
 <span class="kw">impl </span>pallet_collator_selection::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
@@ -2155,6 +2188,11 @@
 				<span class="kw">fn </span>unlockable_asset() -&gt; <span class="prelude-ty">Result</span>&lt;(MultiLocation, MultiLocation, MultiAsset), BenchmarkError&gt; {
 					<span class="prelude-val">Err</span>(BenchmarkError::Skip)
 				}
+
+				<span class="kw">fn </span>export_message_origin_and_destination(
+				) -&gt; <span class="prelude-ty">Result</span>&lt;(MultiLocation, NetworkId, InteriorMultiLocation), BenchmarkError&gt; {
+					<span class="prelude-val">Err</span>(BenchmarkError::Skip)
+				}
 			}
 
 			<span class="kw">type </span>XcmBalances = pallet_xcm_benchmarks::fungible::Pallet::&lt;Runtime&gt;;
@@ -2226,7 +2264,8 @@
 		<span class="kw">use </span>pallet_balances::WeightInfo;
 		<span class="kw">let </span>block = RuntimeBlockWeights::get().max_block;
 		<span class="kw">let </span>base = RuntimeBlockWeights::get().get(DispatchClass::Normal).base_extrinsic;
-		<span class="kw">let </span>transfer = base + weights::pallet_balances::WeightInfo::&lt;Runtime&gt;::transfer();
+		<span class="kw">let </span>transfer =
+			base + weights::pallet_balances::WeightInfo::&lt;Runtime&gt;::transfer_allow_death();
 
 		<span class="kw">let </span>fit = block.checked_div_per_component(<span class="kw-2">&amp;</span>transfer).unwrap_or_default();
 		<span class="macro">assert!</span>(fit &gt;= <span class="number">1000</span>, <span class="string">&quot;{} should be at least 1000&quot;</span>, fit);
@@ -2237,7 +2276,8 @@
 	</span><span class="kw">fn </span>sane_transfer_fee() {
 		<span class="kw">use </span>pallet_balances::WeightInfo;
 		<span class="kw">let </span>base = RuntimeBlockWeights::get().get(DispatchClass::Normal).base_extrinsic;
-		<span class="kw">let </span>transfer = base + weights::pallet_balances::WeightInfo::&lt;Runtime&gt;::transfer();
+		<span class="kw">let </span>transfer =
+			base + weights::pallet_balances::WeightInfo::&lt;Runtime&gt;::transfer_allow_death();
 
 		<span class="kw">let </span>fee: Balance = fee::WeightToFee::weight_to_fee(<span class="kw-2">&amp;</span>transfer);
 		<span class="macro">assert!</span>(fee &lt;= CENTS, <span class="string">&quot;{} MILLICENTS should be at most 1000&quot;</span>, fee / MILLICENTS);
@@ -2259,8 +2299,10 @@
 	</span><span class="attr">#[test]
 	</span><span class="kw">fn </span>full_block_fee_ratio() {
 		<span class="kw">let </span>block = RuntimeBlockWeights::get().max_block;
-		<span class="kw">let </span>time_fee: Balance = fee::WeightToFee::weight_to_fee(<span class="kw-2">&amp;</span>block.without_proof_size());
-		<span class="kw">let </span>proof_fee: Balance = fee::WeightToFee::weight_to_fee(<span class="kw-2">&amp;</span>block.without_ref_time());
+		<span class="kw">let </span>time_fee: Balance =
+			fee::WeightToFee::weight_to_fee(<span class="kw-2">&amp;</span>Weight::from_parts(block.ref_time(), <span class="number">0</span>));
+		<span class="kw">let </span>proof_fee: Balance =
+			fee::WeightToFee::weight_to_fee(<span class="kw-2">&amp;</span>Weight::from_parts(<span class="number">0</span>, block.proof_size()));
 
 		<span class="kw">let </span>proof_o_time = proof_fee.checked_div(time_fee).unwrap_or_default();
 		<span class="macro">assert!</span>(proof_o_time &lt;= <span class="number">30</span>, <span class="string">&quot;{} should be at most 30&quot;</span>, proof_o_time);
@@ -2269,4 +2311,4 @@
 	}
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="statemint_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0 (2c8cc3432 2023-03-06)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="statemint_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.1 (8460ca823 2023-03-20)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>

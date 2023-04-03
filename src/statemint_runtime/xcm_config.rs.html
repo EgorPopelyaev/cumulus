@@ -372,6 +372,13 @@
 <a href="#372" id="372">372</a>
 <a href="#373" id="373">373</a>
 <a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -396,6 +403,7 @@
 	match_types, parameter_types,
 	traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
 };
+<span class="kw">use </span>frame_system::EnsureRoot;
 <span class="kw">use </span>pallet_xcm::XcmPassthrough;
 <span class="kw">use </span>parachains_common::{
 	impls::ToStakingPot,
@@ -422,10 +430,11 @@
 	<span class="kw">pub </span>RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
 	<span class="kw">pub </span>UniversalLocation: InteriorMultiLocation =
 		X2(GlobalConsensus(RelayNetwork::get().unwrap()), Parachain(ParachainInfo::parachain_id().into()));
-	<span class="kw">pub const </span>Local: MultiLocation = MultiLocation::here();
 	<span class="kw">pub </span>TrustBackedAssetsPalletLocation: MultiLocation =
 		PalletInstance(&lt;Assets <span class="kw">as </span>PalletInfoAccess&gt;::index() <span class="kw">as </span>u8).into();
 	<span class="kw">pub </span>CheckingAccount: AccountId = PolkadotXcm::check_account();
+	<span class="kw">pub </span>FellowshipLocation: MultiLocation = MultiLocation::new(<span class="number">1</span>, Parachain(<span class="number">1001</span>));
+	<span class="kw">pub const </span>GovernanceLocation: MultiLocation = MultiLocation::parent();
 }
 
 <span class="doccomment">/// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
@@ -454,7 +463,7 @@
 	</span>(),
 &gt;;
 
-<span class="doccomment">/// `AssetId/Balancer` converter for `TrustBackedAssets``
+<span class="doccomment">/// `AssetId/Balance` converter for `TrustBackedAssets``
 </span><span class="kw">pub type </span>TrustBackedAssetsConvertedConcreteId =
 	assets_common::TrustBackedAssetsConvertedConcreteId&lt;TrustBackedAssetsPalletLocation, Balance&gt;;
 
@@ -516,6 +525,9 @@
 		MultiLocation { parents: <span class="number">1</span>, interior: Here } |
 		MultiLocation { parents: <span class="number">1</span>, interior: X1(<span class="kw">_</span>) }
 	};
+	<span class="kw">pub type </span>FellowsPlurality: <span class="kw">impl </span>Contains&lt;MultiLocation&gt; = {
+		MultiLocation { parents: <span class="number">1</span>, interior: X2(Parachain(<span class="number">1001</span>), Plurality { id: BodyId::Technical, ..}) }
+	};
 }
 
 <span class="doccomment">/// A call filter for the XCM Transact instruction. This is a temporary measure until we properly
@@ -550,7 +562,8 @@
 				pallet_collator_selection::Call::set_desired_candidates { .. } |
 				pallet_collator_selection::Call::set_candidacy_bond { .. } |
 				pallet_collator_selection::Call::register_as_candidate { .. } |
-				pallet_collator_selection::Call::leave_intent { .. },
+				pallet_collator_selection::Call::leave_intent { .. } |
+				pallet_collator_selection::Call::set_invulnerables { .. },
 			) |
 			RuntimeCall::Session(pallet_session::Call::purge_keys { .. }) |
 			RuntimeCall::XcmpQueue(..) |
@@ -627,8 +640,8 @@
 			(
 				<span class="comment">// If the message is one that immediately attemps to pay for execution, then allow it.
 				</span>AllowTopLevelPaidExecutionFrom&lt;Everything&gt;,
-				<span class="comment">// Parent and its plurality (i.e. governance bodies) gets free execution.
-				</span>AllowExplicitUnpaidExecutionFrom&lt;ParentOrParentsPlurality&gt;,
+				<span class="comment">// Parent, its plurality (i.e. governance bodies) and Fellows plurality gets free execution.
+				</span>AllowExplicitUnpaidExecutionFrom&lt;(ParentOrParentsPlurality, FellowsPlurality)&gt;,
 				<span class="comment">// Subscriptions for version tracking are OK.
 				</span>AllowSubscriptionsFrom&lt;ParentOrSiblings&gt;,
 			),
@@ -740,6 +753,7 @@
 	<span class="kw">type </span>WeightInfo = <span class="kw">crate</span>::weights::pallet_xcm::WeightInfo&lt;Runtime&gt;;
 	<span class="attr">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
 	</span><span class="kw">type </span>ReachableDest = ReachableDest;
+	<span class="kw">type </span>AdminOrigin = EnsureRoot&lt;AccountId&gt;;
 }
 
 <span class="kw">impl </span>cumulus_pallet_xcm::Config <span class="kw">for </span>Runtime {
@@ -747,4 +761,4 @@
 	<span class="kw">type </span>XcmExecutor = XcmExecutor&lt;XcmConfig&gt;;
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="statemint_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0 (2c8cc3432 2023-03-06)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="statemint_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.1 (8460ca823 2023-03-20)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>

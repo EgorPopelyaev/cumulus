@@ -812,6 +812,13 @@
 <a href="#812" id="812">812</a>
 <a href="#813" id="813">813</a>
 <a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -890,7 +897,6 @@
 	opaque, AccountId, Balance, BlockNumber, Hash, Header, Index, Signature,
 	AVERAGE_ON_INITIALIZE_RATIO, HOURS, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SLOT_DURATION,
 };
-<span class="kw">use </span>xcm::latest::prelude::BodyId;
 <span class="kw">use </span>xcm_executor::XcmExecutor;
 
 <span class="doccomment">/// The address format for describing accounts.
@@ -1133,6 +1139,10 @@
 	<span class="kw">type </span>MaxLocks = ConstU32&lt;<span class="number">50</span>&gt;;
 	<span class="kw">type </span>MaxReserves = ConstU32&lt;<span class="number">50</span>&gt;;
 	<span class="kw">type </span>ReserveIdentifier = [u8; <span class="number">8</span>];
+	<span class="kw">type </span>HoldIdentifier = ();
+	<span class="kw">type </span>FreezeIdentifier = ();
+	<span class="kw">type </span>MaxHolds = ConstU32&lt;<span class="number">0</span>&gt;;
+	<span class="kw">type </span>MaxFreezes = ConstU32&lt;<span class="number">0</span>&gt;;
 }
 
 <span class="macro">parameter_types! </span>{
@@ -1214,7 +1224,6 @@
 <span class="macro">parameter_types! </span>{
 	<span class="kw">pub const </span>PotId: PalletId = PalletId(<span class="kw-2">*</span><span class="string">b&quot;PotStake&quot;</span>);
 	<span class="kw">pub const </span>SessionLength: BlockNumber = <span class="number">6 </span>* HOURS;
-	<span class="kw">pub const </span>ExecutiveBody: BodyId = BodyId::Executive;
 }
 
 <span class="kw">pub type </span>CollatorSelectionUpdateOrigin = EnsureRoot&lt;AccountId&gt;;
@@ -1571,6 +1580,11 @@
 				<span class="kw">fn </span>unlockable_asset() -&gt; <span class="prelude-ty">Result</span>&lt;(MultiLocation, MultiLocation, MultiAsset), BenchmarkError&gt; {
 					<span class="prelude-val">Err</span>(BenchmarkError::Skip)
 				}
+
+				<span class="kw">fn </span>export_message_origin_and_destination(
+				) -&gt; <span class="prelude-ty">Result</span>&lt;(MultiLocation, NetworkId, InteriorMultiLocation), BenchmarkError&gt; {
+					<span class="prelude-val">Err</span>(BenchmarkError::Skip)
+				}
 			}
 
 			<span class="kw">type </span>XcmBalances = pallet_xcm_benchmarks::fungible::Pallet::&lt;Runtime&gt;;
@@ -1627,4 +1641,4 @@
 	CheckInherents = CheckInherents,
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bridge_hub_rococo_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0 (2c8cc3432 2023-03-06)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bridge_hub_rococo_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.1 (8460ca823 2023-03-20)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
