@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `client/pov-recovery/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../cumulus_client_pov_recovery/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `client/pov-recovery/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../cumulus_client_pov_recovery/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -635,6 +635,25 @@
 <a href="#635" id="635">635</a>
 <a href="#636" id="636">636</a>
 <a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -684,7 +703,7 @@
 
 </span><span class="kw">use </span>sc_client_api::{BlockBackend, BlockchainEvents, UsageProvider};
 <span class="kw">use </span>sc_consensus::import_queue::{ImportQueueService, IncomingBlock};
-<span class="kw">use </span>sp_consensus::{BlockOrigin, BlockStatus};
+<span class="kw">use </span>sp_consensus::{BlockOrigin, BlockStatus, SyncOracle};
 <span class="kw">use </span>sp_runtime::traits::{Block <span class="kw">as </span>BlockT, Header <span class="kw">as </span>HeaderT, NumberFor};
 
 <span class="kw">use </span>polkadot_node_primitives::{AvailableData, POV_BOMB_LIMIT};
@@ -865,6 +884,7 @@
 	</span>recovery_chan_rx: Receiver&lt;RecoveryRequest&lt;Block&gt;&gt;,
 	<span class="doccomment">/// Blocks that we are retrying currently
 	</span>candidates_in_retry: HashSet&lt;Block::Hash&gt;,
+	parachain_sync_service: Arc&lt;<span class="kw">dyn </span>SyncOracle + Sync + Send&gt;,
 }
 
 <span class="kw">impl</span>&lt;Block: BlockT, PC, RCInterface&gt; PoVRecovery&lt;Block, PC, RCInterface&gt;
@@ -881,6 +901,7 @@
 		relay_chain_interface: RCInterface,
 		para_id: ParaId,
 		recovery_chan_rx: Receiver&lt;RecoveryRequest&lt;Block&gt;&gt;,
+		parachain_sync_service: Arc&lt;<span class="kw">dyn </span>SyncOracle + Sync + Send&gt;,
 	) -&gt; <span class="self">Self </span>{
 		<span class="self">Self </span>{
 			candidates: HashMap::new(),
@@ -893,6 +914,7 @@
 			para_id,
 			candidates_in_retry: HashSet::new(),
 			recovery_chan_rx,
+			parachain_sync_service,
 		}
 	}
 
@@ -1175,14 +1197,19 @@
 	</span><span class="kw">pub async fn </span>run(<span class="kw-2">mut </span><span class="self">self</span>) {
 		<span class="kw">let </span><span class="kw-2">mut </span>imported_blocks = <span class="self">self</span>.parachain_client.import_notification_stream().fuse();
 		<span class="kw">let </span><span class="kw-2">mut </span>finalized_blocks = <span class="self">self</span>.parachain_client.finality_notification_stream().fuse();
-		<span class="kw">let </span>pending_candidates =
-			<span class="kw">match </span>pending_candidates(<span class="self">self</span>.relay_chain_interface.clone(), <span class="self">self</span>.para_id).<span class="kw">await </span>{
-				<span class="prelude-val">Ok</span>(pending_candidate_stream) =&gt; pending_candidate_stream.fuse(),
-				<span class="prelude-val">Err</span>(err) =&gt; {
-					<span class="macro">tracing::error!</span>(target: LOG_TARGET, error = <span class="question-mark">?</span>err, <span class="string">&quot;Unable to retrieve pending candidate stream.&quot;</span>);
-					<span class="kw">return
-				</span>},
-			};
+		<span class="kw">let </span>pending_candidates = <span class="kw">match </span>pending_candidates(
+			<span class="self">self</span>.relay_chain_interface.clone(),
+			<span class="self">self</span>.para_id,
+			<span class="self">self</span>.parachain_sync_service.clone(),
+		)
+		.<span class="kw">await
+		</span>{
+			<span class="prelude-val">Ok</span>(pending_candidate_stream) =&gt; pending_candidate_stream.fuse(),
+			<span class="prelude-val">Err</span>(err) =&gt; {
+				<span class="macro">tracing::error!</span>(target: LOG_TARGET, error = <span class="question-mark">?</span>err, <span class="string">&quot;Unable to retrieve pending candidate stream.&quot;</span>);
+				<span class="kw">return
+			</span>},
+		};
 
 		<span class="macro">futures::pin_mut!</span>(pending_candidates);
 
@@ -1237,13 +1264,24 @@
 </span><span class="kw">async fn </span>pending_candidates(
 	relay_chain_client: <span class="kw">impl </span>RelayChainInterface + Clone,
 	para_id: ParaId,
+	sync_service: Arc&lt;<span class="kw">dyn </span>SyncOracle + Sync + Send&gt;,
 ) -&gt; RelayChainResult&lt;<span class="kw">impl </span>Stream&lt;Item = (CommittedCandidateReceipt, SessionIndex)&gt;&gt; {
 	<span class="kw">let </span>import_notification_stream = relay_chain_client.import_notification_stream().<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">let </span>filtered_stream = import_notification_stream.filter_map(<span class="kw">move </span>|n| {
 		<span class="kw">let </span>client_for_closure = relay_chain_client.clone();
+		<span class="kw">let </span>sync_oracle = sync_service.clone();
 		<span class="kw">async move </span>{
 			<span class="kw">let </span>hash = n.hash();
+			<span class="kw">if </span>sync_oracle.is_major_syncing() {
+				<span class="macro">tracing::debug!</span>(
+					target: LOG_TARGET,
+					relay_hash = <span class="question-mark">?</span>hash,
+					<span class="string">&quot;Skipping candidate due to sync.&quot;</span>,
+				);
+				<span class="kw">return </span><span class="prelude-val">None
+			</span>}
+
 			<span class="kw">let </span>pending_availability_result = client_for_closure
 				.candidate_pending_availability(hash, para_id)
 				.<span class="kw">await
@@ -1273,4 +1311,4 @@
 	<span class="prelude-val">Ok</span>(filtered_stream)
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_client_pov_recovery" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.2 (9eb3afe9e 2023-03-27)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cumulus_client_pov_recovery" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
