@@ -888,8 +888,6 @@
 <a href="#888" id="888">888</a>
 <a href="#889" id="889">889</a>
 <a href="#890" id="890">890</a>
-<a href="#891" id="891">891</a>
-<a href="#892" id="892">892</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -1522,7 +1520,7 @@
 		<span class="kw">let </span>parachain_config = node_config(
 			<span class="self">self</span>.storage_update_func_parachain.unwrap_or_else(|| Box::new(|| ())),
 			<span class="self">self</span>.tokio_handle.clone(),
-			<span class="self">self</span>.key.clone(),
+			<span class="self">self</span>.key,
 			<span class="self">self</span>.parachain_nodes,
 			<span class="self">self</span>.parachain_nodes_exclusive,
 			<span class="self">self</span>.para_id,
@@ -1559,7 +1557,7 @@
 		.<span class="kw">await
 		</span>.expect(<span class="string">&quot;could not create Cumulus test service&quot;</span>);
 
-		<span class="kw">let </span>peer_id = network.local_peer_id().clone();
+		<span class="kw">let </span>peer_id = network.local_peer_id();
 		<span class="kw">let </span>addr = MultiaddrWithPeerId { multiaddr, peer_id };
 
 		TestNode { task_manager, client, network, addr, rpc_handlers, transaction_pool }
@@ -1582,7 +1580,7 @@
 	is_collator: bool,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Configuration, ServiceError&gt; {
 	<span class="kw">let </span>base_path = BasePath::new_temp_dir()<span class="question-mark">?</span>;
-	<span class="kw">let </span>root = base_path.path().join(<span class="macro">format!</span>(<span class="string">&quot;cumulus_test_service_{}&quot;</span>, key.to_string()));
+	<span class="kw">let </span>root = base_path.path().join(<span class="macro">format!</span>(<span class="string">&quot;cumulus_test_service_{}&quot;</span>, key));
 	<span class="kw">let </span>role = <span class="kw">if </span>is_collator { Role::Authority } <span class="kw">else </span>{ Role::Full };
 	<span class="kw">let </span>key_seed = key.to_seed();
 	<span class="kw">let </span><span class="kw-2">mut </span>spec = Box::new(chain_spec::get_chain_spec(para_id));
@@ -1637,18 +1635,15 @@
 			offchain_worker: sc_client_api::ExecutionStrategy::NativeWhenPossible,
 			other: sc_client_api::ExecutionStrategy::NativeWhenPossible,
 		},
-		rpc_http: <span class="prelude-val">None</span>,
-		rpc_ws: <span class="prelude-val">None</span>,
-		rpc_ipc: <span class="prelude-val">None</span>,
-		rpc_ws_max_connections: <span class="prelude-val">None</span>,
+		rpc_addr: <span class="prelude-val">None</span>,
+		rpc_max_connections: Default::default(),
 		rpc_cors: <span class="prelude-val">None</span>,
 		rpc_methods: Default::default(),
-		rpc_max_payload: <span class="prelude-val">None</span>,
-		rpc_max_request_size: <span class="prelude-val">None</span>,
-		rpc_max_response_size: <span class="prelude-val">None</span>,
+		rpc_max_request_size: Default::default(),
+		rpc_max_response_size: Default::default(),
 		rpc_id_provider: <span class="prelude-val">None</span>,
-		rpc_max_subs_per_conn: <span class="prelude-val">None</span>,
-		ws_max_out_buffer_capacity: <span class="prelude-val">None</span>,
+		rpc_max_subs_per_conn: Default::default(),
+		rpc_port: <span class="number">9945</span>,
 		prometheus_config: <span class="prelude-val">None</span>,
 		telemetry_endpoints: <span class="prelude-val">None</span>,
 		default_heap_pages: <span class="prelude-val">None</span>,
@@ -1660,7 +1655,8 @@
 		tracing_receiver: Default::default(),
 		max_runtime_instances: <span class="number">8</span>,
 		announce_block: <span class="bool-val">true</span>,
-		base_path: <span class="prelude-val">Some</span>(base_path),
+		data_path: root,
+		base_path,
 		informant_output_format: Default::default(),
 		wasm_runtime_overrides: <span class="prelude-val">None</span>,
 		runtime_cache_size: <span class="number">2</span>,
@@ -1681,7 +1677,7 @@
 		function: <span class="kw">impl </span>Into&lt;runtime::RuntimeCall&gt;,
 		caller: Sr25519Keyring,
 	) -&gt; <span class="prelude-ty">Result</span>&lt;RpcTransactionOutput, RpcTransactionError&gt; {
-		<span class="kw">let </span>extrinsic = construct_extrinsic(<span class="kw-2">&amp;*</span><span class="self">self</span>.client, function, caller.pair(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+		<span class="kw">let </span>extrinsic = construct_extrinsic(<span class="kw-2">&amp;</span><span class="self">self</span>.client, function, caller.pair(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
 
 		<span class="self">self</span>.rpc_handlers.send_transaction(extrinsic.into()).<span class="kw">await
 	</span>}
@@ -1763,7 +1759,7 @@
 	key: Sr25519Keyring,
 	storage_update_func: <span class="kw">impl </span>Fn(),
 	boot_nodes: Vec&lt;MultiaddrWithPeerId&gt;,
-	websocket_port: <span class="prelude-ty">Option</span>&lt;u16&gt;,
+	port: <span class="prelude-ty">Option</span>&lt;u16&gt;,
 ) -&gt; polkadot_test_service::PolkadotTestNode {
 	<span class="kw">let </span><span class="kw-2">mut </span>config = polkadot_test_service::node_config(
 		storage_update_func,
@@ -1773,8 +1769,8 @@
 		<span class="bool-val">true</span>,
 	);
 
-	<span class="kw">if let </span><span class="prelude-val">Some</span>(port) = websocket_port {
-		config.rpc_ws = <span class="prelude-val">Some</span>(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>)), port));
+	<span class="kw">if let </span><span class="prelude-val">Some</span>(port) = port {
+		config.rpc_addr = <span class="prelude-val">Some</span>(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>)), port));
 	}
 
 	polkadot_test_service::run_validator_node(

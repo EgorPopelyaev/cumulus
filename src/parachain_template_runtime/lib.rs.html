@@ -801,7 +801,7 @@
 <span class="kw">use </span>xcm_executor::XcmExecutor;
 
 <span class="doccomment">/// Import the template pallet.
-</span><span class="kw">pub use </span>pallet_template;
+</span><span class="kw">pub use </span>pallet_parachain_template;
 
 <span class="doccomment">/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 </span><span class="kw">pub type </span>Signature = MultiSignature;
@@ -1200,7 +1200,7 @@
 }
 
 <span class="doccomment">/// Configure the pallet template in pallets/template.
-</span><span class="kw">impl </span>pallet_template::Config <span class="kw">for </span>Runtime {
+</span><span class="kw">impl </span>pallet_parachain_template::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
 }
 
@@ -1235,7 +1235,7 @@
 		DmpQueue: cumulus_pallet_dmp_queue = <span class="number">33</span>,
 
 		<span class="comment">// Template
-		</span>TemplatePallet: pallet_template = <span class="number">40</span>,
+		</span>TemplatePallet: pallet_parachain_template = <span class="number">40</span>,
 	}
 );
 
@@ -1429,13 +1429,13 @@
 			<span class="macro">list_benchmarks!</span>(list, extra);
 
 			<span class="kw">let </span>storage_info = AllPalletsWithSystem::storage_info();
-			<span class="kw">return </span>(list, storage_info)
+			(list, storage_info)
 		}
 
 		<span class="kw">fn </span>dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig
 		) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;frame_benchmarking::BenchmarkBatch&gt;, sp_runtime::RuntimeString&gt; {
-			<span class="kw">use </span>frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey};
+			<span class="kw">use </span>frame_benchmarking::{Benchmarking, BenchmarkBatch};
 
 			<span class="kw">use </span>frame_system_benchmarking::Pallet <span class="kw">as </span>SystemBench;
 			<span class="kw">impl </span>frame_system_benchmarking::Config <span class="kw">for </span>Runtime {}

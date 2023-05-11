@@ -342,14 +342,6 @@
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -469,8 +461,12 @@
 		para_config: <span class="kw-2">&amp;</span>sc_service::Configuration,
 		relay_chain_args: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>String&gt;,
 	) -&gt; <span class="self">Self </span>{
-		<span class="kw">let </span>base_path = para_config.base_path.as_ref().map(|x| x.path().join(<span class="string">&quot;polkadot&quot;</span>));
-		<span class="self">Self </span>{ base_path, chain_id: <span class="prelude-val">None</span>, base: clap::Parser::parse_from(relay_chain_args) }
+		<span class="kw">let </span>base_path = para_config.base_path.path().join(<span class="string">&quot;polkadot&quot;</span>);
+		<span class="self">Self </span>{
+			base_path: <span class="prelude-val">Some</span>(base_path),
+			chain_id: <span class="prelude-val">None</span>,
+			base: clap::Parser::parse_from(relay_chain_args),
+		}
 	}
 }
 
@@ -498,16 +494,8 @@
 			</span>.or_else(|| <span class="self">self</span>.base_path.clone().map(Into::into)))
 	}
 
-	<span class="kw">fn </span>rpc_http(<span class="kw-2">&amp;</span><span class="self">self</span>, default_listen_port: u16) -&gt; CliResult&lt;<span class="prelude-ty">Option</span>&lt;SocketAddr&gt;&gt; {
-		<span class="self">self</span>.base.base.rpc_http(default_listen_port)
-	}
-
-	<span class="kw">fn </span>rpc_ipc(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CliResult&lt;<span class="prelude-ty">Option</span>&lt;String&gt;&gt; {
-		<span class="self">self</span>.base.base.rpc_ipc()
-	}
-
-	<span class="kw">fn </span>rpc_ws(<span class="kw-2">&amp;</span><span class="self">self</span>, default_listen_port: u16) -&gt; CliResult&lt;<span class="prelude-ty">Option</span>&lt;SocketAddr&gt;&gt; {
-		<span class="self">self</span>.base.base.rpc_ws(default_listen_port)
+	<span class="kw">fn </span>rpc_addr(<span class="kw-2">&amp;</span><span class="self">self</span>, default_listen_port: u16) -&gt; CliResult&lt;<span class="prelude-ty">Option</span>&lt;SocketAddr&gt;&gt; {
+		<span class="self">self</span>.base.base.rpc_addr(default_listen_port)
 	}
 
 	<span class="kw">fn </span>prometheus_config(
@@ -556,8 +544,8 @@
 		<span class="self">self</span>.base.base.rpc_methods()
 	}
 
-	<span class="kw">fn </span>rpc_ws_max_connections(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CliResult&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;&gt; {
-		<span class="self">self</span>.base.base.rpc_ws_max_connections()
+	<span class="kw">fn </span>rpc_max_connections(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CliResult&lt;u32&gt; {
+		<span class="self">self</span>.base.base.rpc_max_connections()
 	}
 
 	<span class="kw">fn </span>rpc_cors(<span class="kw-2">&amp;</span><span class="self">self</span>, is_dev: bool) -&gt; CliResult&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;&gt; {
@@ -601,12 +589,8 @@
 		<span class="number">30334
 	</span>}
 
-	<span class="kw">fn </span>rpc_ws_listen_port() -&gt; u16 {
+	<span class="kw">fn </span>rpc_listen_port() -&gt; u16 {
 		<span class="number">9945
-	</span>}
-
-	<span class="kw">fn </span>rpc_http_listen_port() -&gt; u16 {
-		<span class="number">9934
 	</span>}
 
 	<span class="kw">fn </span>prometheus_listen_port() -&gt; u16 {
