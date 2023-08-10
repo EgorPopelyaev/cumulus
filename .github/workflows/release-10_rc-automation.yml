@@ -48,7 +48,7 @@ jobs:
           # We can't use the normal GITHUB_TOKEN for the following reason:
           # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
           # RELEASE_BRANCH_TOKEN requires public_repo OAuth scope
-          repo-token: "${{ secrets.RELEASE_BRANCH_TOKEN }}"
+          repo-token: "${{ secrets.RELEASE_BRANCH_TOKEN_EPO }}"
           tag: ${{ steps.compute_tag.outputs.new_tag }}
 
       - id: create-issue-checklist-client
