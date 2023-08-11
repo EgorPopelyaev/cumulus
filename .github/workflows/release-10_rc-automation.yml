@@ -48,7 +48,6 @@ jobs:
           # We can't use the normal GITHUB_TOKEN for the following reason:
           # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
           # RELEASE_BRANCH_TOKEN requires public_repo OAuth scope
-          
           repo-token: "${{ secrets.RELEASE_BRANCH_TOKEN_EPO }}"
           tag: ${{ steps.compute_tag.outputs.new_tag }}
 
@@ -60,7 +59,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.compute_tag.outputs.version }}
         with:
+          assignees: EgorPopelyaev
           filename: .github/ISSUE_TEMPLATE/release-client.md
+          labels: B0-silent, C0-low
 
       - id: create-issue-checklist-runtime
         uses: JasonEtco/create-an-issue@e27dddc79c92bc6e4562f268fffa5ed752639abd # v2.9.1
@@ -70,7 +71,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.compute_tag.outputs.version }}
         with:
+          assignees: EgorPopelyaev
           filename: .github/ISSUE_TEMPLATE/release-runtime.md
+          labels: B0-silent, C0-low
 
       - name: Matrix notification to ${{ matrix.channel.name }}
         uses: s3krit/matrix-message-action@70ad3fb812ee0e45ff8999d6af11cafad11a6ecf # v0.0.3
