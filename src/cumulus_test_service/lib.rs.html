@@ -900,6 +900,7 @@
 <a href="#900" id="900">900</a>
 <a href="#901" id="901">901</a>
 <a href="#902" id="902">902</a>
+<a href="#903" id="903">903</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -1163,9 +1164,9 @@
 	<span class="kw">let </span>relay_chain_full_node = polkadot_test_service::new_full(
 		relay_chain_config,
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>key) = collator_key {
-			polkadot_service::IsCollator::Yes(key.clone())
+			polkadot_service::IsParachainNode::Collator(key.clone())
 		} <span class="kw">else </span>{
-			polkadot_service::IsCollator::Yes(CollatorPair::generate().<span class="number">0</span>)
+			polkadot_service::IsParachainNode::Collator(CollatorPair::generate().<span class="number">0</span>)
 		},
 		<span class="prelude-val">None</span>,
 	)
@@ -1375,8 +1376,8 @@
 	</span><span class="kw">pub </span>client: Arc&lt;Client&gt;,
 	<span class="doccomment">/// Node&#39;s network.
 	</span><span class="kw">pub </span>network: Arc&lt;NetworkService&lt;Block, H256&gt;&gt;,
-	<span class="doccomment">/// The `MultiaddrWithPeerId` to this node. This is useful if you want to pass it as &quot;boot node&quot;
-	/// to other nodes.
+	<span class="doccomment">/// The `MultiaddrWithPeerId` to this node. This is useful if you want to pass it as &quot;boot
+	/// node&quot; to other nodes.
 	</span><span class="kw">pub </span>addr: MultiaddrWithPeerId,
 	<span class="doccomment">/// RPCHandlers to make RPC queries.
 	</span><span class="kw">pub </span>rpc_handlers: RpcHandlers,
@@ -1414,7 +1415,8 @@
 	///
 	/// `para_id` - The parachain id this node is running for.
 	/// `tokio_handle` - The tokio handler to use.
-	/// `key` - The key that will be used to generate the name and that will be passed as `dev_seed`.
+	/// `key` - The key that will be used to generate the name and that will be passed as
+	/// `dev_seed`.
 	</span><span class="kw">pub fn </span>new(para_id: ParaId, tokio_handle: tokio::runtime::Handle, key: Sr25519Keyring) -&gt; <span class="self">Self </span>{
 		TestNodeBuilder {
 			key,

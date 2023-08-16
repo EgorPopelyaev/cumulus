@@ -1178,20 +1178,6 @@
 <a href="#1178" id="1178">1178</a>
 <a href="#1179" id="1179">1179</a>
 <a href="#1180" id="1180">1180</a>
-<a href="#1181" id="1181">1181</a>
-<a href="#1182" id="1182">1182</a>
-<a href="#1183" id="1183">1183</a>
-<a href="#1184" id="1184">1184</a>
-<a href="#1185" id="1185">1185</a>
-<a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
-<a href="#1190" id="1190">1190</a>
-<a href="#1191" id="1191">1191</a>
-<a href="#1192" id="1192">1192</a>
-<a href="#1193" id="1193">1193</a>
-<a href="#1194" id="1194">1194</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2020-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -1241,7 +1227,7 @@
 	traits::{EnsureOrigin, Get},
 	weights::{constants::WEIGHT_REF_TIME_PER_MILLIS, Weight},
 };
-<span class="kw">use </span>polkadot_runtime_common::xcm_sender::ConstantPrice;
+<span class="kw">use </span>polkadot_runtime_common::xcm_sender::PriceForParachainDelivery;
 <span class="kw">use </span>rand_chacha::{
 	rand_core::{RngCore, SeedableRng},
 	ChaChaRng,
@@ -1301,7 +1287,7 @@
 		</span><span class="kw">type </span>ControllerOriginConverter: ConvertOrigin&lt;<span class="self">Self</span>::RuntimeOrigin&gt;;
 
 		<span class="doccomment">/// The price for delivering an XCM to a sibling parachain destination.
-		</span><span class="kw">type </span>PriceForSiblingDelivery: PriceForSiblingDelivery;
+		</span><span class="kw">type </span>PriceForSiblingDelivery: PriceForParachainDelivery;
 
 		<span class="doccomment">/// The weight information of this pallet.
 		</span><span class="kw">type </span>WeightInfo: WeightInfo;
@@ -1381,8 +1367,8 @@
 			<span class="prelude-val">Ok</span>(())
 		}
 
-		<span class="doccomment">/// Overwrites the number of pages of messages which must be in the queue for the other side to be told to
-		/// suspend their sending.
+		<span class="doccomment">/// Overwrites the number of pages of messages which must be in the queue for the other side
+		/// to be told to suspend their sending.
 		///
 		/// - `origin`: Must pass `Root`.
 		/// - `new`: Desired value for `QueueConfigData.suspend_value`
@@ -1395,8 +1381,8 @@
 			<span class="prelude-val">Ok</span>(())
 		}
 
-		<span class="doccomment">/// Overwrites the number of pages of messages which must be in the queue after which we drop any further
-		/// messages from the channel.
+		<span class="doccomment">/// Overwrites the number of pages of messages which must be in the queue after which we
+		/// drop any further messages from the channel.
 		///
 		/// - `origin`: Must pass `Root`.
 		/// - `new`: Desired value for `QueueConfigData.drop_threshold`
@@ -1409,8 +1395,8 @@
 			<span class="prelude-val">Ok</span>(())
 		}
 
-		<span class="doccomment">/// Overwrites the number of pages of messages which the queue must be reduced to before it signals that
-		/// message sending may recommence after it has been suspended.
+		<span class="doccomment">/// Overwrites the number of pages of messages which the queue must be reduced to before it
+		/// signals that message sending may recommence after it has been suspended.
 		///
 		/// - `origin`: Must pass `Root`.
 		/// - `new`: Desired value for `QueueConfigData.resume_threshold`
@@ -1437,7 +1423,8 @@
 		}
 
 		<span class="doccomment">/// Overwrites the speed to which the available weight approaches the maximum weight.
-		/// A lower number results in a faster progression. A value of 1 makes the entire weight available initially.
+		/// A lower number results in a faster progression. A value of 1 makes the entire weight
+		/// available initially.
 		///
 		/// - `origin`: Must pass `Root`.
 		/// - `new`: Desired value for `QueueConfigData.weight_restrict_decay`.
@@ -1451,7 +1438,8 @@
 		}
 
 		<span class="doccomment">/// Overwrite the maximum amount of weight any individual message may consume.
-		/// Messages above this weight go into the overweight queue and may only be serviced explicitly.
+		/// Messages above this weight go into the overweight queue and may only be serviced
+		/// explicitly.
 		///
 		/// - `origin`: Must pass `Root`.
 		/// - `new`: Desired value for `QueueConfigData.xcmp_max_individual_weight`.
@@ -1873,8 +1861,8 @@
 									Overweight::&lt;T&gt;::count() &lt; MAX_OVERWEIGHT_MESSAGES;
 								weight_used.saturating_accrue(T::DbWeight::get().reads(<span class="number">1</span>));
 								<span class="kw">if </span>is_under_limit {
-									<span class="comment">// overweight - add to overweight queue and continue with message
-									// execution consuming the message.
+									<span class="comment">// overweight - add to overweight queue and continue with
+									// message execution consuming the message.
 									</span><span class="kw">let </span>msg_len = last_remaining_fragments
 										.len()
 										.saturating_sub(remaining_fragments.len());
@@ -2329,22 +2317,6 @@
 	}
 }
 
-<span class="kw">pub trait </span>PriceForSiblingDelivery {
-	<span class="kw">fn </span>price_for_sibling_delivery(id: ParaId, message: <span class="kw-2">&amp;</span>Xcm&lt;()&gt;) -&gt; MultiAssets;
-}
-
-<span class="kw">impl </span>PriceForSiblingDelivery <span class="kw">for </span>() {
-	<span class="kw">fn </span>price_for_sibling_delivery(<span class="kw">_</span>: ParaId, <span class="kw">_</span>: <span class="kw-2">&amp;</span>Xcm&lt;()&gt;) -&gt; MultiAssets {
-		MultiAssets::new()
-	}
-}
-
-<span class="kw">impl</span>&lt;T: Get&lt;MultiAssets&gt;&gt; PriceForSiblingDelivery <span class="kw">for </span>ConstantPrice&lt;T&gt; {
-	<span class="kw">fn </span>price_for_sibling_delivery(<span class="kw">_</span>: ParaId, <span class="kw">_</span>: <span class="kw-2">&amp;</span>Xcm&lt;()&gt;) -&gt; MultiAssets {
-		T::get()
-	}
-}
-
 <span class="doccomment">/// Xcm sender for sending to a sibling parachain.
 </span><span class="kw">impl</span>&lt;T: Config&gt; SendXcm <span class="kw">for </span>Pallet&lt;T&gt; {
 	<span class="kw">type </span>Ticket = (ParaId, VersionedXcm&lt;()&gt;);
@@ -2360,7 +2332,7 @@
 			</span>MultiLocation { parents: <span class="number">1</span>, interior: X1(Parachain(id)) } =&gt; {
 				<span class="kw">let </span>xcm = msg.take().ok_or(SendError::MissingArgument)<span class="question-mark">?</span>;
 				<span class="kw">let </span>id = ParaId::from(<span class="kw-2">*</span>id);
-				<span class="kw">let </span>price = T::PriceForSiblingDelivery::price_for_sibling_delivery(id, <span class="kw-2">&amp;</span>xcm);
+				<span class="kw">let </span>price = T::PriceForSiblingDelivery::price_for_parachain_delivery(id, <span class="kw-2">&amp;</span>xcm);
 				<span class="kw">let </span>versioned_xcm = T::VersionWrapper::wrap_version(<span class="kw-2">&amp;</span>d, xcm)
 					.map_err(|()| SendError::DestinationUnsupported)<span class="question-mark">?</span>;
 				<span class="prelude-val">Ok</span>(((id, versioned_xcm), price))
