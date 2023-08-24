@@ -906,22 +906,6 @@
 <a href="#906" id="906">906</a>
 <a href="#907" id="907">907</a>
 <a href="#908" id="908">908</a>
-<a href="#909" id="909">909</a>
-<a href="#910" id="910">910</a>
-<a href="#911" id="911">911</a>
-<a href="#912" id="912">912</a>
-<a href="#913" id="913">913</a>
-<a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
-<a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a>
-<a href="#920" id="920">920</a>
-<a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (C) 2022 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -988,14 +972,14 @@
 <span class="kw">use </span>sp_version::RuntimeVersion;
 
 <span class="kw">use </span>codec::{Decode, Encode, MaxEncodedLen};
-<span class="kw">use </span>constants::{currency::<span class="kw-2">*</span>, fee::WeightToFee};
+<span class="kw">use </span>constants::{consensus::<span class="kw-2">*</span>, currency::<span class="kw-2">*</span>, fee::WeightToFee};
 <span class="kw">use </span>frame_support::{
 	construct_runtime,
 	dispatch::DispatchClass,
 	parameter_types,
 	traits::{ConstBool, ConstU16, ConstU32, ConstU64, ConstU8, EitherOfDiverse, InstanceFilter},
 	weights::{ConstantMultiplier, Weight},
-	PalletId, RuntimeDebug,
+	PalletId,
 };
 <span class="kw">use </span>frame_system::{
 	limits::{BlockLength, BlockWeights},
@@ -1007,6 +991,7 @@
 	AVERAGE_ON_INITIALIZE_RATIO, DAYS, HOURS, MAXIMUM_BLOCK_WEIGHT, MINUTES, NORMAL_DISPATCH_RATIO,
 	SLOT_DURATION,
 };
+<span class="kw">use </span>sp_runtime::RuntimeDebug;
 <span class="kw">use </span>xcm_config::{GovernanceLocation, XcmConfig, XcmOriginToTransactDispatchOrigin};
 
 <span class="attr">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
@@ -1031,7 +1016,7 @@
 	spec_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;collectives&quot;</span>),
 	impl_name: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;collectives&quot;</span>),
 	authoring_version: <span class="number">1</span>,
-	spec_version: <span class="number">9430</span>,
+	spec_version: <span class="number">10000</span>,
 	impl_version: <span class="number">0</span>,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: <span class="number">5</span>,
@@ -1292,6 +1277,12 @@
 	<span class="kw">type </span>XcmpMessageHandler = XcmpQueue;
 	<span class="kw">type </span>ReservedXcmpWeight = ReservedXcmpWeight;
 	<span class="kw">type </span>CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
+	<span class="kw">type </span>ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook&lt;
+		Runtime,
+		RELAY_CHAIN_SLOT_DURATION_MILLIS,
+		BLOCK_PROCESSING_VELOCITY,
+		UNINCLUDED_SEGMENT_CAPACITY,
+	&gt;;
 }
 
 <span class="kw">impl </span>parachain_info::Config <span class="kw">for </span>Runtime {}
@@ -1778,7 +1769,8 @@
 		<span class="kw">fn </span>dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig
 		) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;frame_benchmarking::BenchmarkBatch&gt;, sp_runtime::RuntimeString&gt; {
-			<span class="kw">use </span>frame_benchmarking::{Benchmarking, BenchmarkBatch, BenchmarkError, TrackedStorageKey};
+			<span class="kw">use </span>frame_benchmarking::{Benchmarking, BenchmarkBatch, BenchmarkError};
+			<span class="kw">use </span>sp_storage::TrackedStorageKey;
 
 			<span class="kw">use </span>frame_system_benchmarking::Pallet <span class="kw">as </span>SystemBench;
 			<span class="kw">impl </span>frame_system_benchmarking::Config <span class="kw">for </span>Runtime {
@@ -1818,32 +1810,8 @@
 	}
 }
 
-<span class="kw">struct </span>CheckInherents;
-
-<span class="kw">impl </span>cumulus_pallet_parachain_system::CheckInherents&lt;Block&gt; <span class="kw">for </span>CheckInherents {
-	<span class="kw">fn </span>check_inherents(
-		block: <span class="kw-2">&amp;</span>Block,
-		relay_state_proof: <span class="kw-2">&amp;</span>cumulus_pallet_parachain_system::RelayChainStateProof,
-	) -&gt; sp_inherents::CheckInherentsResult {
-		<span class="kw">let </span>relay_chain_slot = relay_state_proof
-			.read_slot()
-			.expect(<span class="string">&quot;Could not read the relay chain slot from the proof&quot;</span>);
-
-		<span class="kw">let </span>inherent_data =
-			cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
-				relay_chain_slot,
-				sp_std::time::Duration::from_secs(<span class="number">6</span>),
-			)
-			.create_inherent_data()
-			.expect(<span class="string">&quot;Could not create the timestamp inherent data&quot;</span>);
-
-		inherent_data.check_extrinsics(block)
-	}
-}
-
 <span class="macro">cumulus_pallet_parachain_system::register_validate_block! </span>{
 	Runtime = Runtime,
 	BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::&lt;Runtime, Executive&gt;,
-	CheckInherents = CheckInherents,
 }
 </code></pre></div></section></main></body></html>

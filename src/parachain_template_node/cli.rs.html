@@ -110,9 +110,6 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
 
 <span class="doccomment">/// Sub-commands supported by the collator.
@@ -150,12 +147,9 @@
 	</span><span class="attr">#[command(subcommand)]
 	</span>Benchmark(frame_benchmarking_cli::BenchmarkCmd),
 
-	<span class="doccomment">/// Try some testing command against a specified runtime state.
-	</span><span class="attr">#[cfg(feature = <span class="string">&quot;try-runtime&quot;</span>)]
-	</span>TryRuntime(try_runtime_cli::TryRuntimeCmd),
-
-	<span class="doccomment">/// Errors since the binary was not build with `--features try-runtime`.
-	</span><span class="attr">#[cfg(not(feature = <span class="string">&quot;try-runtime&quot;</span>))]
+	<span class="doccomment">/// Try-runtime has migrated to a standalone
+	/// [CLI](&lt;https://github.com/paritytech/try-runtime-cli&gt;). The subcommand exists as a stub and
+	/// deprecation notice. It will be removed entirely some time after Janurary 2024.
 	</span>TryRuntime,
 }
 

@@ -1078,6 +1078,12 @@
 <a href="#1078" id="1078">1078</a>
 <a href="#1079" id="1079">1079</a>
 <a href="#1080" id="1080">1080</a>
+<a href="#1081" id="1081">1081</a>
+<a href="#1082" id="1082">1082</a>
+<a href="#1083" id="1083">1083</a>
+<a href="#1084" id="1084">1084</a>
+<a href="#1085" id="1085">1085</a>
+<a href="#1086" id="1086">1086</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>beefy_primitives::ecdsa_crypto::AuthorityId <span class="kw">as </span>BeefyId;
 <span class="kw">use </span>grandpa::AuthorityId <span class="kw">as </span>GrandpaId;
 <span class="kw">use </span>pallet_im_online::sr25519::AuthorityId <span class="kw">as </span>ImOnlineId;
@@ -1372,6 +1378,7 @@
 		para_validator: ValidatorId,
 		para_assignment: AssignmentId,
 		authority_discovery: AuthorityDiscoveryId,
+		beefy: BeefyId,
 	) -&gt; westend_runtime::SessionKeys {
 		westend_runtime::SessionKeys {
 			babe,
@@ -1380,6 +1387,7 @@
 			para_validator,
 			para_assignment,
 			authority_discovery,
+			beefy,
 		}
 	}
 
@@ -1410,6 +1418,7 @@
 								x.<span class="number">5</span>.clone(),
 								x.<span class="number">6</span>.clone(),
 								x.<span class="number">7</span>.clone(),
+								get_from_seed::&lt;BeefyId&gt;(<span class="string">&quot;Alice&quot;</span>),
 							),
 						)
 					})
@@ -1478,6 +1487,7 @@
 		para_validator: ValidatorId,
 		para_assignment: AssignmentId,
 		authority_discovery: AuthorityDiscoveryId,
+		beefy: BeefyId,
 	) -&gt; kusama_runtime::SessionKeys {
 		kusama_runtime::SessionKeys {
 			babe,
@@ -1486,6 +1496,7 @@
 			para_validator,
 			para_assignment,
 			authority_discovery,
+			beefy,
 		}
 	}
 
@@ -1515,6 +1526,7 @@
 								x.<span class="number">5</span>.clone(),
 								x.<span class="number">6</span>.clone(),
 								x.<span class="number">7</span>.clone(),
+								get_from_seed::&lt;BeefyId&gt;(<span class="string">&quot;Alice&quot;</span>),
 							),
 						)
 					})

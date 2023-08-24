@@ -331,11 +331,11 @@
 <span class="kw">use </span>bp_header_chain::{justification::GrandpaJustification, ChainWithGrandpa};
 <span class="kw">use </span>bp_runtime::BlockNumberOf;
 <span class="kw">use </span>codec::Encode;
-<span class="kw">use </span>frame_support::{dispatch::CallableCallFor, traits::IsSubType, weights::Weight, RuntimeDebug};
+<span class="kw">use </span>frame_support::{dispatch::CallableCallFor, traits::IsSubType, weights::Weight};
 <span class="kw">use </span>sp_runtime::{
 	traits::{Header, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
-	SaturatedConversion,
+	RuntimeDebug, SaturatedConversion,
 };
 
 <span class="doccomment">/// Info about a `SubmitParachainHeads` call which tries to update a single parachain.

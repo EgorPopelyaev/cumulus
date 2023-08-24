@@ -901,6 +901,13 @@
 <a href="#901" id="901">901</a>
 <a href="#902" id="902">902</a>
 <a href="#903" id="903">903</a>
+<a href="#904" id="904">904</a>
+<a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -937,19 +944,23 @@
 <span class="kw">use </span>url::Url;
 
 <span class="kw">use </span><span class="kw">crate</span>::runtime::Weight;
-<span class="kw">use </span>cumulus_client_cli::CollatorOptions;
+<span class="kw">use </span>cumulus_client_cli::{CollatorOptions, RelayChainMode};
 <span class="kw">use </span>cumulus_client_consensus_common::{
 	ParachainBlockImport <span class="kw">as </span>TParachainBlockImport, ParachainCandidate, ParachainConsensus,
 };
 <span class="kw">use </span>cumulus_client_pov_recovery::RecoveryHandle;
+<span class="attr">#[allow(deprecated)]
+</span><span class="kw">use </span>cumulus_client_service::old_consensus;
 <span class="kw">use </span>cumulus_client_service::{
-	build_network, prepare_node_config, start_collator, start_full_node, BuildNetworkParams,
-	StartCollatorParams, StartFullNodeParams,
+	build_network, prepare_node_config, start_relay_chain_tasks, BuildNetworkParams,
+	CollatorSybilResistance, DARecoveryProfile, StartRelayChainTasksParams,
 };
 <span class="kw">use </span>cumulus_primitives_core::ParaId;
 <span class="kw">use </span>cumulus_relay_chain_inprocess_interface::RelayChainInProcessInterface;
 <span class="kw">use </span>cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
-<span class="kw">use </span>cumulus_relay_chain_minimal_node::build_minimal_relay_chain_node;
+<span class="kw">use </span>cumulus_relay_chain_minimal_node::{
+	build_minimal_relay_chain_node_light_client, build_minimal_relay_chain_node_with_rpc,
+};
 
 <span class="kw">use </span>cumulus_test_runtime::{Hash, Header, NodeBlock <span class="kw">as </span>Block, RuntimeApi};
 
@@ -975,9 +986,8 @@
 <span class="kw">use </span>sp_blockchain::HeaderBackend;
 <span class="kw">use </span>sp_core::{Pair, H256};
 <span class="kw">use </span>sp_keyring::Sr25519Keyring;
-<span class="kw">use </span>sp_runtime::{codec::Encode, generic, traits::BlakeTwo256};
+<span class="kw">use </span>sp_runtime::{codec::Encode, generic};
 <span class="kw">use </span>sp_state_machine::BasicExternalities;
-<span class="kw">use </span>sp_trie::PrefixedMemoryDB;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>substrate_test_client::{
 	BlockchainEventsExt, RpcHandlersExt, RpcTransactionError, RpcTransactionOutput,
@@ -1086,7 +1096,7 @@
 		Client,
 		Backend,
 		(),
-		sc_consensus::import_queue::BasicQueue&lt;Block, PrefixedMemoryDB&lt;BlakeTwo256&gt;&gt;,
+		sc_consensus::import_queue::BasicQueue&lt;Block&gt;,
 		sc_transaction_pool::FullPool&lt;Block, Client&gt;,
 		ParachainBlockImport,
 	&gt;,
@@ -1151,26 +1161,30 @@
 	collator_options: CollatorOptions,
 	task_manager: <span class="kw-2">&amp;mut </span>TaskManager,
 ) -&gt; RelayChainResult&lt;Arc&lt;<span class="kw">dyn </span>RelayChainInterface + <span class="lifetime">&#39;static</span>&gt;&gt; {
-	<span class="kw">if </span>!collator_options.relay_chain_rpc_urls.is_empty() {
-		<span class="kw">return </span>build_minimal_relay_chain_node(
+	<span class="kw">let </span>relay_chain_full_node = <span class="kw">match </span>collator_options.relay_chain_mode {
+		cumulus_client_cli::RelayChainMode::Embedded =&gt; polkadot_test_service::new_full(
 			relay_chain_config,
-			task_manager,
-			collator_options.relay_chain_rpc_urls,
+			<span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>key) = collator_key {
+				polkadot_service::IsParachainNode::Collator(key.clone())
+			} <span class="kw">else </span>{
+				polkadot_service::IsParachainNode::Collator(CollatorPair::generate().<span class="number">0</span>)
+			},
+			<span class="prelude-val">None</span>,
 		)
-		.<span class="kw">await
-		</span>.map(|r| r.<span class="number">0</span>)
-	}
-
-	<span class="kw">let </span>relay_chain_full_node = polkadot_test_service::new_full(
-		relay_chain_config,
-		<span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>key) = collator_key {
-			polkadot_service::IsParachainNode::Collator(key.clone())
-		} <span class="kw">else </span>{
-			polkadot_service::IsParachainNode::Collator(CollatorPair::generate().<span class="number">0</span>)
-		},
-		<span class="prelude-val">None</span>,
-	)
-	.map_err(|e| RelayChainError::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
+		.map_err(|e| RelayChainError::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>,
+		cumulus_client_cli::RelayChainMode::ExternalRpc(rpc_target_urls) =&gt;
+			<span class="kw">return </span>build_minimal_relay_chain_node_with_rpc(
+				relay_chain_config,
+				task_manager,
+				rpc_target_urls,
+			)
+			.<span class="kw">await
+			</span>.map(|r| r.<span class="number">0</span>),
+		cumulus_client_cli::RelayChainMode::LightClient =&gt;
+			<span class="kw">return </span>build_minimal_relay_chain_node_light_client(relay_chain_config, task_manager)
+				.<span class="kw">await
+				</span>.map(|r| r.<span class="number">0</span>),
+	};
 
 	task_manager.add_child(relay_chain_full_node.task_manager);
 	<span class="macro">tracing::info!</span>(<span class="string">&quot;Using inprocess node.&quot;</span>);
@@ -1242,7 +1256,8 @@
 			spawn_handle: task_manager.spawn_handle(),
 			relay_chain_interface: relay_chain_interface.clone(),
 			import_queue: params.import_queue,
-		})
+			sybil_resistance_level: CollatorSybilResistance::Unresistant, <span class="comment">// no consensus
+		</span>})
 		.<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">let </span>prometheus_registry = parachain_config.prometheus_registry().cloned();
@@ -1283,10 +1298,29 @@
 		.map_err(|e| sc_service::Error::Application(Box::new(e)))<span class="question-mark">?</span>;
 
 	<span class="kw">let </span>recovery_handle: Box&lt;<span class="kw">dyn </span>RecoveryHandle&gt; = <span class="kw">if </span>fail_pov_recovery {
-		Box::new(FailingRecoveryHandle::new(overseer_handle))
+		Box::new(FailingRecoveryHandle::new(overseer_handle.clone()))
 	} <span class="kw">else </span>{
-		Box::new(overseer_handle)
+		Box::new(overseer_handle.clone())
 	};
+	<span class="kw">let </span>is_collator = collator_key.is_some();
+	<span class="kw">let </span>relay_chain_slot_duration = Duration::from_secs(<span class="number">6</span>);
+
+	start_relay_chain_tasks(StartRelayChainTasksParams {
+		client: client.clone(),
+		announce_block: announce_block.clone(),
+		para_id,
+		relay_chain_interface: relay_chain_interface.clone(),
+		task_manager: <span class="kw-2">&amp;mut </span>task_manager,
+		da_recovery_profile: <span class="kw">if </span>is_collator {
+			DARecoveryProfile::Collator
+		} <span class="kw">else </span>{
+			DARecoveryProfile::FullNode
+		},
+		import_queue: import_queue_service,
+		relay_chain_slot_duration,
+		recovery_handle,
+		sync_service: sync_service.clone(),
+	})<span class="question-mark">?</span>;
 
 	<span class="kw">if let </span><span class="prelude-val">Some</span>(collator_key) = collator_key {
 		<span class="kw">let </span>parachain_consensus: Box&lt;<span class="kw">dyn </span>ParachainConsensus&lt;Block&gt;&gt; = <span class="kw">match </span>consensus {
@@ -1330,37 +1364,18 @@
 			Consensus::Null =&gt; Box::new(NullConsensus),
 		};
 
-		<span class="kw">let </span>params = StartCollatorParams {
+		<span class="attr">#[allow(deprecated)]
+		</span>old_consensus::start_collator(old_consensus::StartCollatorParams {
 			block_status: client.clone(),
 			announce_block,
-			client: client.clone(),
+			runtime_api: client.clone(),
 			spawner: task_manager.spawn_handle(),
-			task_manager: <span class="kw-2">&amp;mut </span>task_manager,
 			para_id,
 			parachain_consensus,
-			relay_chain_interface,
-			collator_key,
-			import_queue: import_queue_service,
-			relay_chain_slot_duration: Duration::from_secs(<span class="number">6</span>),
-			recovery_handle,
-			sync_service,
-		};
-
-		start_collator(params).<span class="kw">await</span><span class="question-mark">?</span>;
-	} <span class="kw">else </span>{
-		<span class="kw">let </span>params = StartFullNodeParams {
-			client: client.clone(),
-			announce_block,
-			task_manager: <span class="kw-2">&amp;mut </span>task_manager,
-			para_id,
-			relay_chain_interface,
-			import_queue: import_queue_service,
-			relay_chain_slot_duration: Duration::from_secs(<span class="number">6</span>),
-			recovery_handle,
-			sync_service,
-		};
-
-		start_full_node(params)<span class="question-mark">?</span>;
+			key: collator_key,
+			overseer_handle,
+		})
+		.<span class="kw">await</span>;
 	}
 
 	start_network.start_network();
@@ -1406,7 +1421,7 @@
 	storage_update_func_parachain: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>Fn()&gt;&gt;,
 	storage_update_func_relay_chain: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>Fn()&gt;&gt;,
 	consensus: Consensus,
-	relay_chain_full_node_url: Vec&lt;Url&gt;,
+	relay_chain_mode: RelayChainMode,
 	endowed_accounts: Vec&lt;AccountId&gt;,
 }
 
@@ -1430,8 +1445,8 @@
 			storage_update_func_parachain: <span class="prelude-val">None</span>,
 			storage_update_func_relay_chain: <span class="prelude-val">None</span>,
 			consensus: Consensus::RelayChain,
-			relay_chain_full_node_url: <span class="macro">vec!</span>[],
 			endowed_accounts: Default::default(),
+			relay_chain_mode: RelayChainMode::Embedded,
 		}
 	}
 
@@ -1525,7 +1540,7 @@
 
 	<span class="doccomment">/// Connect to full node via RPC.
 	</span><span class="kw">pub fn </span>use_external_relay_chain_node_at_url(<span class="kw-2">mut </span><span class="self">self</span>, network_address: Url) -&gt; <span class="self">Self </span>{
-		<span class="self">self</span>.relay_chain_full_node_url = <span class="macro">vec!</span>[network_address];
+		<span class="self">self</span>.relay_chain_mode = RelayChainMode::ExternalRpc(<span class="macro">vec!</span>[network_address]);
 		<span class="self">self
 	</span>}
 
@@ -1534,7 +1549,7 @@
 		<span class="kw">let </span><span class="kw-2">mut </span>localhost_url =
 			Url::parse(<span class="string">&quot;ws://localhost&quot;</span>).expect(<span class="string">&quot;Should be able to parse localhost Url&quot;</span>);
 		localhost_url.set_port(<span class="prelude-val">Some</span>(port)).expect(<span class="string">&quot;Should be able to set port&quot;</span>);
-		<span class="self">self</span>.relay_chain_full_node_url = <span class="macro">vec!</span>[localhost_url];
+		<span class="self">self</span>.relay_chain_mode = RelayChainMode::ExternalRpc(<span class="macro">vec!</span>[localhost_url]);
 		<span class="self">self
 	</span>}
 
@@ -1566,8 +1581,7 @@
 			<span class="bool-val">false</span>,
 		);
 
-		<span class="kw">let </span>collator_options =
-			CollatorOptions { relay_chain_rpc_urls: <span class="self">self</span>.relay_chain_full_node_url };
+		<span class="kw">let </span>collator_options = CollatorOptions { relay_chain_mode: <span class="self">self</span>.relay_chain_mode };
 
 		relay_chain_config.network.node_name =
 			<span class="macro">format!</span>(<span class="string">&quot;{} (relay chain)&quot;</span>, relay_chain_config.network.node_name);

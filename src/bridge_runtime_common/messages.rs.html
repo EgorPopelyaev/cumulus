@@ -735,6 +735,7 @@
 <a href="#735" id="735">735</a>
 <a href="#736" id="736">736</a>
 <a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Parity Bridges Common.
 
@@ -768,9 +769,10 @@
 };
 <span class="kw">use </span>bp_runtime::{Chain, RawStorageProof, Size, StorageProofChecker};
 <span class="kw">use </span>codec::{Decode, Encode};
-<span class="kw">use </span>frame_support::{traits::Get, weights::Weight, RuntimeDebug};
+<span class="kw">use </span>frame_support::{traits::Get, weights::Weight};
 <span class="kw">use </span>hash_db::Hasher;
 <span class="kw">use </span>scale_info::TypeInfo;
+<span class="kw">use </span>sp_runtime::RuntimeDebug;
 <span class="kw">use </span>sp_std::{convert::TryFrom, marker::PhantomData, vec::Vec};
 
 <span class="doccomment">/// Bidirectional message bridge.

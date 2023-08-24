@@ -70,6 +70,7 @@
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Parity Bridges Common.
 
@@ -96,7 +97,8 @@
 <span class="kw">use </span>bp_runtime::{
 	decl_bridge_finality_runtime_apis, decl_bridge_messages_runtime_apis, Chain, Parachain,
 };
-<span class="kw">use </span>frame_support::{dispatch::DispatchClass, RuntimeDebug};
+<span class="kw">use </span>frame_support::dispatch::DispatchClass;
+<span class="kw">use </span>sp_runtime::RuntimeDebug;
 <span class="kw">use </span>sp_std::prelude::Vec;
 
 <span class="doccomment">/// BridgeHubWococo parachain.

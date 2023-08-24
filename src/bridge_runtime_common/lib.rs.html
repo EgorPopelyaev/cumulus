@@ -362,7 +362,7 @@
 </span><span class="attr">#[macro_export]
 </span><span class="macro">macro_rules! </span>generate_bridge_reject_obsolete_headers_and_messages {
 	(<span class="macro-nonterminal">$call</span>:ty, <span class="macro-nonterminal">$account_id</span>:ty, $(<span class="macro-nonterminal">$filter_call</span>:ty),<span class="kw-2">*</span>) =&gt; {
-		<span class="attr">#[derive(Clone, codec::Decode, Default, codec::Encode, Eq, PartialEq, frame_support::RuntimeDebug, scale_info::TypeInfo)]
+		<span class="attr">#[derive(Clone, codec::Decode, Default, codec::Encode, Eq, PartialEq, sp_runtime::RuntimeDebug, scale_info::TypeInfo)]
 		</span><span class="kw">pub struct </span>BridgeRejectObsoleteHeadersAndMessages;
 		<span class="kw">impl </span>sp_runtime::traits::SignedExtension <span class="kw">for </span>BridgeRejectObsoleteHeadersAndMessages {
 			<span class="kw">const </span>IDENTIFIER: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;BridgeRejectObsoleteHeadersAndMessages&quot;</span>;

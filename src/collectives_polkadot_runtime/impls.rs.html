@@ -244,10 +244,10 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::OriginCaller;
 <span class="kw">use </span>frame_support::{
 	dispatch::{DispatchError, DispatchResultWithPostInfo},
-	log,
 	traits::{Currency, Get, Imbalance, OnUnbalanced, OriginTrait, PrivilegeCmp},
 	weights::Weight,
 };
+<span class="kw">use </span>log;
 <span class="kw">use </span>pallet_alliance::{ProposalIndex, ProposalProvider};
 <span class="kw">use </span>parachains_common::impls::NegativeImbalance;
 <span class="kw">use </span>sp_std::{cmp::Ordering, marker::PhantomData, prelude::<span class="kw-2">*</span>};

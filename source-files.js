@@ -1,6 +1,6 @@
 var sourcesIndex = JSON.parse('{\
 "asset_hub_kusama_integration_tests":["",[],["lib.rs"]],\
-"asset_hub_kusama_runtime":["",[["weights",[["xcm",[],["mod.rs","pallet_xcm_benchmarks_fungible.rs","pallet_xcm_benchmarks_generic.rs"]]],["block_weights.rs","cumulus_pallet_xcmp_queue.rs","extrinsic_weights.rs","frame_system.rs","mod.rs","pallet_assets_foreign.rs","pallet_assets_local.rs","pallet_balances.rs","pallet_collator_selection.rs","pallet_multisig.rs","pallet_nft_fractionalization.rs","pallet_nfts.rs","pallet_proxy.rs","pallet_session.rs","pallet_timestamp.rs","pallet_uniques.rs","pallet_utility.rs","pallet_xcm.rs","paritydb_weights.rs","rocksdb_weights.rs"]]],["constants.rs","lib.rs","xcm_config.rs"]],\
+"asset_hub_kusama_runtime":["",[["weights",[["xcm",[],["mod.rs","pallet_xcm_benchmarks_fungible.rs","pallet_xcm_benchmarks_generic.rs"]]],["block_weights.rs","cumulus_pallet_xcmp_queue.rs","extrinsic_weights.rs","frame_system.rs","mod.rs","pallet_asset_conversion.rs","pallet_assets_foreign.rs","pallet_assets_local.rs","pallet_assets_pool.rs","pallet_balances.rs","pallet_collator_selection.rs","pallet_multisig.rs","pallet_nft_fractionalization.rs","pallet_nfts.rs","pallet_proxy.rs","pallet_session.rs","pallet_timestamp.rs","pallet_uniques.rs","pallet_utility.rs","pallet_xcm.rs","paritydb_weights.rs","rocksdb_weights.rs"]]],["constants.rs","lib.rs","xcm_config.rs"]],\
 "asset_hub_polkadot_integration_tests":["",[],["lib.rs"]],\
 "asset_hub_polkadot_runtime":["",[["weights",[["xcm",[],["mod.rs","pallet_xcm_benchmarks_fungible.rs","pallet_xcm_benchmarks_generic.rs"]]],["block_weights.rs","cumulus_pallet_xcmp_queue.rs","extrinsic_weights.rs","frame_system.rs","mod.rs","pallet_assets_foreign.rs","pallet_assets_local.rs","pallet_balances.rs","pallet_collator_selection.rs","pallet_multisig.rs","pallet_nfts.rs","pallet_proxy.rs","pallet_session.rs","pallet_timestamp.rs","pallet_uniques.rs","pallet_utility.rs","pallet_xcm.rs","paritydb_weights.rs","rocksdb_weights.rs"]]],["constants.rs","lib.rs","xcm_config.rs"]],\
 "asset_hub_westend_integration_tests":["",[],["lib.rs"]],\
@@ -19,6 +19,7 @@ var sourcesIndex = JSON.parse('{\
 "bp_runtime":["",[],["chain.rs","extensions.rs","lib.rs","messages.rs","storage_proof.rs","storage_types.rs"]],\
 "bp_test_utils":["",[],["keyring.rs","lib.rs"]],\
 "bp_wococo":["",[],["lib.rs"]],\
+"bp_xcm_bridge_hub_router":["",[],["lib.rs"]],\
 "bridge_hub_kusama_runtime":["",[["weights",[["xcm",[],["mod.rs","pallet_xcm_benchmarks_fungible.rs","pallet_xcm_benchmarks_generic.rs"]]],["block_weights.rs","cumulus_pallet_xcmp_queue.rs","extrinsic_weights.rs","frame_system.rs","mod.rs","pallet_balances.rs","pallet_collator_selection.rs","pallet_multisig.rs","pallet_session.rs","pallet_timestamp.rs","pallet_utility.rs","pallet_xcm.rs","paritydb_weights.rs","rocksdb_weights.rs"]]],["constants.rs","lib.rs","xcm_config.rs"]],\
 "bridge_hub_polkadot_runtime":["",[["weights",[["xcm",[],["mod.rs","pallet_xcm_benchmarks_fungible.rs","pallet_xcm_benchmarks_generic.rs"]]],["block_weights.rs","cumulus_pallet_xcmp_queue.rs","extrinsic_weights.rs","frame_system.rs","mod.rs","pallet_balances.rs","pallet_collator_selection.rs","pallet_multisig.rs","pallet_session.rs","pallet_timestamp.rs","pallet_utility.rs","pallet_xcm.rs","paritydb_weights.rs","rocksdb_weights.rs"]]],["constants.rs","lib.rs","xcm_config.rs"]],\
 "bridge_hub_rococo_integration_tests":["",[],["lib.rs"]],\
@@ -37,9 +38,9 @@ var sourcesIndex = JSON.parse('{\
 "cumulus_client_network":["",[],["lib.rs"]],\
 "cumulus_client_pov_recovery":["",[],["active_candidate_recovery.rs","lib.rs"]],\
 "cumulus_client_service":["",[],["lib.rs"]],\
-"cumulus_pallet_aura_ext":["",[],["lib.rs"]],\
+"cumulus_pallet_aura_ext":["",[],["consensus_hook.rs","lib.rs"]],\
 "cumulus_pallet_dmp_queue":["",[],["lib.rs","migration.rs"]],\
-"cumulus_pallet_parachain_system":["",[["validate_block",[],["mod.rs"]]],["lib.rs","migration.rs","relay_state_snapshot.rs"]],\
+"cumulus_pallet_parachain_system":["",[["validate_block",[],["mod.rs"]]],["consensus_hook.rs","lib.rs","migration.rs","relay_state_snapshot.rs","unincluded_segment.rs"]],\
 "cumulus_pallet_parachain_system_proc_macro":["",[],["lib.rs"]],\
 "cumulus_pallet_session_benchmarking":["",[],["lib.rs"]],\
 "cumulus_pallet_solo_to_para":["",[],["lib.rs"]],\
@@ -54,7 +55,7 @@ var sourcesIndex = JSON.parse('{\
 "cumulus_relay_chain_inprocess_interface":["",[],["lib.rs"]],\
 "cumulus_relay_chain_interface":["",[],["lib.rs"]],\
 "cumulus_relay_chain_minimal_node":["",[],["blockchain_rpc_client.rs","collator_overseer.rs","lib.rs","network.rs"]],\
-"cumulus_relay_chain_rpc_interface":["",[],["lib.rs","reconnecting_ws_client.rs","rpc_client.rs"]],\
+"cumulus_relay_chain_rpc_interface":["",[],["lib.rs","light_client_worker.rs","reconnecting_ws_client.rs","rpc_client.rs","tokio_platform.rs"]],\
 "cumulus_test_client":["",[],["block_builder.rs","lib.rs"]],\
 "cumulus_test_relay_sproof_builder":["",[],["lib.rs"]],\
 "cumulus_test_relay_validation_worker_provider":["",[],["lib.rs"]],\

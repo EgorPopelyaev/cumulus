@@ -221,6 +221,12 @@
 <a href="#221" id="221">221</a>
 <a href="#222" id="222">222</a>
 <a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2022 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -261,9 +267,15 @@
 <span class="kw">use </span>cumulus_primitives_core::relay_chain::BlockId;
 <span class="kw">pub use </span>url::Url;
 
+<span class="kw">mod </span>light_client_worker;
 <span class="kw">mod </span>reconnecting_ws_client;
 <span class="kw">mod </span>rpc_client;
-<span class="kw">pub use </span>rpc_client::{create_client_and_start_worker, RelayChainRpcClient};
+<span class="kw">mod </span>tokio_platform;
+
+<span class="kw">pub use </span>rpc_client::{
+	create_client_and_start_light_client_worker, create_client_and_start_worker,
+	RelayChainRpcClient,
+};
 
 <span class="kw">const </span>TIMEOUT_IN_SECONDS: u64 = <span class="number">6</span>;
 

@@ -127,9 +127,6 @@
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
@@ -187,12 +184,9 @@
 	</span><span class="attr">#[command(subcommand)]
 	</span>Benchmark(frame_benchmarking_cli::BenchmarkCmd),
 
-	<span class="doccomment">/// Try some testing command against a specified runtime state.
-	</span><span class="attr">#[cfg(feature = <span class="string">&quot;try-runtime&quot;</span>)]
-	</span>TryRuntime(try_runtime_cli::TryRuntimeCmd),
-
-	<span class="doccomment">/// Errors since the binary was not build with `--features try-runtime`.
-	</span><span class="attr">#[cfg(not(feature = <span class="string">&quot;try-runtime&quot;</span>))]
+	<span class="doccomment">/// Try-runtime has migrated to a standalone
+	/// [CLI](&lt;https://github.com/paritytech/try-runtime-cli&gt;). The subcommand exists as a stub and
+	/// deprecation notice. It will be removed entirely some time after January 2024.
 	</span>TryRuntime,
 }
 

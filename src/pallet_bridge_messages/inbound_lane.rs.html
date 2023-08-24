@@ -553,6 +553,7 @@
 <a href="#553" id="553">553</a>
 <a href="#554" id="554">554</a>
 <a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Parity Bridges Common.
 
@@ -579,8 +580,9 @@
 	ReceivalResult, UnrewardedRelayer,
 };
 <span class="kw">use </span>codec::{Decode, Encode, EncodeLike, MaxEncodedLen};
-<span class="kw">use </span>frame_support::{traits::Get, RuntimeDebug};
+<span class="kw">use </span>frame_support::traits::Get;
 <span class="kw">use </span>scale_info::{Type, TypeInfo};
+<span class="kw">use </span>sp_runtime::RuntimeDebug;
 <span class="kw">use </span>sp_std::prelude::PartialEq;
 
 <span class="doccomment">/// Inbound lane storage.

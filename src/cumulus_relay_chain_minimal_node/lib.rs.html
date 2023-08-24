@@ -211,6 +211,45 @@
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
 <a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2017-2022 Parity Technologies (UK) Ltd.
 // This file is part of Polkadot.
 
@@ -230,12 +269,14 @@
 </span><span class="kw">use </span>collator_overseer::{CollatorOverseerGenArgs, NewMinimalNode};
 
 <span class="kw">use </span>cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
-<span class="kw">use </span>cumulus_relay_chain_rpc_interface::{RelayChainRpcInterface, Url};
+<span class="kw">use </span>cumulus_relay_chain_rpc_interface::{RelayChainRpcClient, RelayChainRpcInterface, Url};
 <span class="kw">use </span>network::build_collator_network;
 <span class="kw">use </span>polkadot_network_bridge::{peer_sets_info, IsAuthority};
 <span class="kw">use </span>polkadot_node_network_protocol::{
 	peer_set::PeerSetProtocolNames,
-	request_response::{v1, IncomingRequest, IncomingRequestReceiver, Protocol, ReqProtocolNames},
+	request_response::{
+		v1, vstaging, IncomingRequest, IncomingRequestReceiver, Protocol, ReqProtocolNames,
+	},
 };
 
 <span class="kw">use </span>polkadot_node_subsystem_util::metrics::prometheus::Registry;
@@ -249,12 +290,13 @@
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">mod </span>blockchain_rpc_client;
 <span class="kw">mod </span>collator_overseer;
-
 <span class="kw">mod </span>network;
 
-<span class="kw">mod </span>blockchain_rpc_client;
 <span class="kw">pub use </span>blockchain_rpc_client::BlockChainRpcClient;
+
+<span class="kw">const </span>LOG_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">&quot;minimal-relaychain-node&quot;</span>;
 
 <span class="kw">fn </span>build_authority_discovery_service&lt;Block: BlockT&gt;(
 	task_manager: <span class="kw-2">&amp;</span>TaskManager,
@@ -293,16 +335,11 @@
 	service
 }
 
-<span class="kw">pub async fn </span>build_minimal_relay_chain_node(
+<span class="kw">async fn </span>build_interface(
 	polkadot_config: Configuration,
 	task_manager: <span class="kw-2">&amp;mut </span>TaskManager,
-	relay_chain_url: Vec&lt;Url&gt;,
+	client: RelayChainRpcClient,
 ) -&gt; RelayChainResult&lt;(Arc&lt;(<span class="kw">dyn </span>RelayChainInterface + <span class="lifetime">&#39;static</span>)&gt;, <span class="prelude-ty">Option</span>&lt;CollatorPair&gt;)&gt; {
-	<span class="kw">let </span>client = cumulus_relay_chain_rpc_interface::create_client_and_start_worker(
-		relay_chain_url,
-		task_manager,
-	)
-	.<span class="kw">await</span><span class="question-mark">?</span>;
 	<span class="kw">let </span>collator_pair = CollatorPair::generate().<span class="number">0</span>;
 	<span class="kw">let </span>collator_node = new_minimal_relay_chain(
 		polkadot_config,
@@ -317,6 +354,44 @@
 	))
 }
 
+<span class="kw">pub async fn </span>build_minimal_relay_chain_node_with_rpc(
+	polkadot_config: Configuration,
+	task_manager: <span class="kw-2">&amp;mut </span>TaskManager,
+	relay_chain_url: Vec&lt;Url&gt;,
+) -&gt; RelayChainResult&lt;(Arc&lt;(<span class="kw">dyn </span>RelayChainInterface + <span class="lifetime">&#39;static</span>)&gt;, <span class="prelude-ty">Option</span>&lt;CollatorPair&gt;)&gt; {
+	<span class="kw">let </span>client = cumulus_relay_chain_rpc_interface::create_client_and_start_worker(
+		relay_chain_url,
+		task_manager,
+	)
+	.<span class="kw">await</span><span class="question-mark">?</span>;
+
+	build_interface(polkadot_config, task_manager, client).<span class="kw">await
+</span>}
+
+<span class="kw">pub async fn </span>build_minimal_relay_chain_node_light_client(
+	polkadot_config: Configuration,
+	task_manager: <span class="kw-2">&amp;mut </span>TaskManager,
+) -&gt; RelayChainResult&lt;(Arc&lt;(<span class="kw">dyn </span>RelayChainInterface + <span class="lifetime">&#39;static</span>)&gt;, <span class="prelude-ty">Option</span>&lt;CollatorPair&gt;)&gt; {
+	<span class="macro">tracing::info!</span>(
+		target: LOG_TARGET,
+		chain_name = polkadot_config.chain_spec.name(),
+		chain_id = polkadot_config.chain_spec.id(),
+		<span class="string">&quot;Initializing embedded light client with chain spec.&quot;
+	</span>);
+
+	<span class="kw">let </span>spec = polkadot_config
+		.chain_spec
+		.as_json(<span class="bool-val">false</span>)
+		.map_err(RelayChainError::GenericError)<span class="question-mark">?</span>;
+
+	<span class="kw">let </span>client = cumulus_relay_chain_rpc_interface::create_client_and_start_light_client_worker(
+		spec,
+		task_manager,
+	)
+	.<span class="kw">await</span><span class="question-mark">?</span>;
+
+	build_interface(polkadot_config, task_manager, client).<span class="kw">await
+</span>}
 <span class="doccomment">/// Builds a minimal relay chain node. Chain data is fetched
 /// via [`BlockChainRpcClient`] and fed into the overseer and its subsystems.
 ///
@@ -328,8 +403,6 @@
 /// - NetworkBridgeRx
 /// - NetworkBridgeTx
 /// - RuntimeApi
-/// - ChainApi
-/// - AvailabilityDistribution
 </span><span class="attr">#[sc_tracing::logging::prefix_logs_with(<span class="string">&quot;Relaychain&quot;</span>)]
 </span><span class="kw">async fn </span>new_minimal_relay_chain(
 	config: Configuration,
@@ -361,7 +434,7 @@
 	}
 
 	<span class="kw">let </span>request_protocol_names = ReqProtocolNames::new(genesis_hash, config.chain_spec.fork_id());
-	<span class="kw">let </span>(collation_req_receiver, available_data_req_receiver) =
+	<span class="kw">let </span>(collation_req_receiver_v1, collation_req_receiver_vstaging, available_data_req_receiver) =
 		build_request_response_protocol_receivers(<span class="kw-2">&amp;</span>request_protocol_names, <span class="kw-2">&amp;mut </span>net_config);
 
 	<span class="kw">let </span>best_header = relay_chain_rpc_client
@@ -390,7 +463,8 @@
 		network_service: network.clone(),
 		sync_oracle,
 		authority_discovery_service,
-		collation_req_receiver,
+		collation_req_receiver_v1,
+		collation_req_receiver_vstaging,
 		available_data_req_receiver,
 		registry: prometheus_registry.as_ref(),
 		spawner: task_manager.spawn_handle(),
@@ -412,9 +486,13 @@
 	config: <span class="kw-2">&amp;mut </span>FullNetworkConfiguration,
 ) -&gt; (
 	IncomingRequestReceiver&lt;v1::CollationFetchingRequest&gt;,
+	IncomingRequestReceiver&lt;vstaging::CollationFetchingRequest&gt;,
 	IncomingRequestReceiver&lt;v1::AvailableDataFetchingRequest&gt;,
 ) {
-	<span class="kw">let </span>(collation_req_receiver, cfg) =
+	<span class="kw">let </span>(collation_req_receiver_v1, cfg) =
+		IncomingRequest::get_config_receiver(request_protocol_names);
+	config.add_request_response_protocol(cfg);
+	<span class="kw">let </span>(collation_req_receiver_vstaging, cfg) =
 		IncomingRequest::get_config_receiver(request_protocol_names);
 	config.add_request_response_protocol(cfg);
 	<span class="kw">let </span>(available_data_req_receiver, cfg) =
@@ -422,6 +500,6 @@
 	config.add_request_response_protocol(cfg);
 	<span class="kw">let </span>cfg = Protocol::ChunkFetchingV1.get_outbound_only_config(request_protocol_names);
 	config.add_request_response_protocol(cfg);
-	(collation_req_receiver, available_data_req_receiver)
+	(collation_req_receiver_v1, collation_req_receiver_vstaging, available_data_req_receiver)
 }
 </code></pre></div></section></main></body></html>

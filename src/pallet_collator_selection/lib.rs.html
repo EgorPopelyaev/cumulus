@@ -697,7 +697,6 @@
 <a href="#697" id="697">697</a>
 <a href="#698" id="698">698</a>
 <a href="#699" id="699">699</a>
-<a href="#700" id="700">700</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -783,10 +782,6 @@
 	<span class="kw">use </span>frame_support::{
 		dispatch::{DispatchClass, DispatchResultWithPostInfo},
 		pallet_prelude::<span class="kw-2">*</span>,
-		sp_runtime::{
-			traits::{AccountIdConversion, CheckedSub, Saturating, Zero},
-			RuntimeDebug,
-		},
 		traits::{
 			Currency, EnsureOrigin, ExistenceRequirement::KeepAlive, ReservableCurrency,
 			ValidatorRegistration,
@@ -795,7 +790,10 @@
 	};
 	<span class="kw">use </span>frame_system::{pallet_prelude::<span class="kw-2">*</span>, Config <span class="kw">as </span>SystemConfig};
 	<span class="kw">use </span>pallet_session::SessionManager;
-	<span class="kw">use </span>sp_runtime::traits::Convert;
+	<span class="kw">use </span>sp_runtime::{
+		traits::{AccountIdConversion, CheckedSub, Convert, Saturating, Zero},
+		RuntimeDebug,
+	};
 	<span class="kw">use </span>sp_staking::SessionIndex;
 	<span class="kw">use </span>sp_std::vec::Vec;
 

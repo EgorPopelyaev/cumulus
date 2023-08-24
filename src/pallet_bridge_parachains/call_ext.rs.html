@@ -241,6 +241,9 @@
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2021 Parity Technologies (UK) Ltd.
 // This file is part of Parity Bridges Common.
 
@@ -260,8 +263,11 @@
 </span><span class="kw">use crate</span>::{Config, Pallet, RelayBlockNumber};
 <span class="kw">use </span>bp_parachains::BestParaHeadHash;
 <span class="kw">use </span>bp_polkadot_core::parachains::{ParaHash, ParaId};
-<span class="kw">use </span>frame_support::{dispatch::CallableCallFor, traits::IsSubType, RuntimeDebug};
-<span class="kw">use </span>sp_runtime::transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction};
+<span class="kw">use </span>frame_support::{dispatch::CallableCallFor, traits::IsSubType};
+<span class="kw">use </span>sp_runtime::{
+	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
+	RuntimeDebug,
+};
 
 <span class="doccomment">/// Info about a `SubmitParachainHeads` call which tries to update a single parachain.
 </span><span class="attr">#[derive(PartialEq, RuntimeDebug)]

@@ -33,6 +33,7 @@
 <a href="#33" id="33">33</a>
 <a href="#34" id="34">34</a>
 <a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Parity Bridges Common.
 
@@ -52,8 +53,9 @@
 </span><span class="doccomment">//! Primitives that may be used by different message delivery and dispatch mechanisms.
 
 </span><span class="kw">use </span>codec::{Decode, Encode};
-<span class="kw">use </span>frame_support::{weights::Weight, RuntimeDebug};
+<span class="kw">use </span>frame_support::weights::Weight;
 <span class="kw">use </span>scale_info::TypeInfo;
+<span class="kw">use </span>sp_runtime::RuntimeDebug;
 
 <span class="doccomment">/// Message dispatch result.
 </span><span class="attr">#[derive(Encode, Decode, RuntimeDebug, Clone, PartialEq, Eq, TypeInfo)]

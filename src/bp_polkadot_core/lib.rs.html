@@ -314,14 +314,14 @@
 		constants::{BlockExecutionWeight, WEIGHT_REF_TIME_PER_SECOND},
 		Weight,
 	},
-	Blake2_128Concat, RuntimeDebug,
+	Blake2_128Concat,
 };
 <span class="kw">use </span>frame_system::limits;
 <span class="kw">use </span>sp_core::{storage::StorageKey, Hasher <span class="kw">as </span>HasherT};
 <span class="kw">use </span>sp_runtime::{
 	generic,
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
-	MultiAddress, MultiSignature, OpaqueExtrinsic,
+	MultiAddress, MultiSignature, OpaqueExtrinsic, RuntimeDebug,
 };
 <span class="kw">use </span>sp_std::prelude::Vec;
 
